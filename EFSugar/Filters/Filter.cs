@@ -18,6 +18,7 @@ namespace EFSugar.Filters
         public virtual IQueryable<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
             ParameterExpression entityParam = Expression.Parameter(typeof(T));
+            var expressionGroups = new Dictionary<int, Expression<Func<T, bool>>>();
             var entityType = typeof(T);
 
             Expression<Func<T, bool>> predicate = s => true;
@@ -28,7 +29,18 @@ namespace EFSugar.Filters
                 var filterValue = prop.GetValue(this);
                 if(filterValue.IsAssigned())
                 {
-                    var entityProp = entityType.GetProperty(prop.Name, _bindingFlags);
+                    //get the filterproperty
+                    var filterAttr = prop.GetCustomAttribute<FilterProperty>();
+                    
+                    var propName = prop.Name;
+                    //see which name to use
+                    if (filterAttr.IsAssigned() && !String.IsNullOrWhiteSpace(filterAttr.PropertyName))
+                    {
+                        propName = filterAttr.PropertyName;
+                    }
+                    //get the propertyinfo from the entity
+                    var entityProp = entityType.GetProperty(propName, _bindingFlags);
+
                     if(entityProp != null)
                     {
                         var left = Expression.Property(entityParam, entityProp);
