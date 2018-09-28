@@ -9,4 +9,12 @@ namespace Tests.FilterTestGoup
     { 
         public string Name { get; set; }
     }
+
+    internal class TestFilter2: Filter
+    {
+        public int One { get; set; }
+        public int Two { get; set; }
+        public int Three { get; set; }
+        public int Four { get; set; }
+    }
 }

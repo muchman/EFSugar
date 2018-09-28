@@ -10,6 +10,7 @@ namespace Tests.FakeDatabase
     public class TestDbContext : DbContext
     {
         DbSet<TestClass> TestClass { get; set; }
+        DbSet<TestClass2> TestClass2{ get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseInMemoryDatabase(databaseName: "Testing_DB");
