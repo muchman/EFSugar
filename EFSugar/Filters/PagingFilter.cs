@@ -5,12 +5,12 @@ using System.Text;
 
 namespace EFSugar.Filters
 {
-    public class PagingFilter<T>
+    public class PagingFilter
     {
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
 
-        public FilterResult<IQueryable<T>> ApplyFilter(IQueryable<T> query)
+        public FilterResult<IQueryable<T>> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
             var result = new FilterResult<IQueryable<T>>();
             result.RecordCount = query.Count();

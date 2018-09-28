@@ -1,7 +1,9 @@
-﻿using System;
+﻿using EFSugar.Enumerations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace EFSugar
@@ -43,6 +45,23 @@ namespace EFSugar
         public static bool IsAssigned<T>(this T item)
         {
             return !(EqualityComparer<T>.Default.Equals(item, default(T)));
+        }
+
+        public static bool IsAssigned(this object instance, PropertyInfo prop)
+        {
+            return prop.GetValue(instance).IsAssigned();
+        }
+
+        public static IOrderedQueryable<TSource> OrderBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, SortDirection direction)
+        {
+            if (direction == SortDirection.Ascending)
+            {
+                return source.OrderBy(keySelector);
+            }
+            else
+            {
+                return source.OrderByDescending(keySelector);
+            }
         }
     }
 
