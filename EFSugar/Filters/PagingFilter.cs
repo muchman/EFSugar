@@ -14,7 +14,12 @@ namespace EFSugar.Filters
         {
             var result = new FilterResult<IQueryable<T>>();
             result.RecordCount = query.Count();
-            result.Result = query.Skip((PageNumber > 0 ? PageNumber - 1 : 0) * PageSize).Take(PageSize);
+
+            //this really only works if you have a pagesize, otherwise how many do you skip or take?
+            if (PageSize > 0)
+            {
+                result.Result = query.Skip((PageNumber > 0 ? PageNumber - 1 : 0) * PageSize).Take(PageSize);
+            }
             return result;
         }
     }

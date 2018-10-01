@@ -11,8 +11,9 @@ namespace EFSugar.Filters
     public class Filter
     {
         private const BindingFlags _bindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.IgnoreCase;
-        public Expression OrderBy { get; set; }
-        public PagingFilter PagingFilter { get; set; }
+        public Expression OrderByFilter { get; set; }
+        public PagingFilter PagingFilter = new PagingFilter();
+        public SortDirection SortDirection { get; set; }
 
         private static Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>> FilterTestMap =
             new Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>>()
@@ -25,7 +26,7 @@ namespace EFSugar.Filters
                 { FilterTest.NotEqual, Expression.NotEqual }
             };
 
-        public virtual IQueryable<T> ApplyFilter<T>(IQueryable<T> query) where T : class
+        public virtual FilterResult<IQueryable<T>> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
             ParameterExpression entityParam = Expression.Parameter(typeof(T));
             var expressionGroups = new Dictionary<int, Expression<Func<T, bool>>>();
@@ -66,7 +67,10 @@ namespace EFSugar.Filters
                 }
             }
 
-            return query.Where(predicate);
+            query = query.Where(predicate);
+            query = query.OrderBy(OrderByFilter, SortDirection);
+
+            return PagingFilter.ApplyFilter(query);
         }
     }
 }
