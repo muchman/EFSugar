@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFSugar.Enumerations;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,6 +11,7 @@ namespace EFSugar.Filters
         public int GroupNumber { get; set; }
         public string PropertyName { get; set; }
         public FilterOperation Operation { get; set; }
+        public FilterTest Test { get; set; }
         public FilterProperty(int groupNumber, FilterOperation operation = FilterOperation.And)
         {
             GroupNumber = groupNumber;
@@ -26,11 +28,5 @@ namespace EFSugar.Filters
         {
             PropertyName = propertyName;
         }
-    }
-
-    public enum FilterOperation
-    {
-        And,
-        Or
     }
 }

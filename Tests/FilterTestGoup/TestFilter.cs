@@ -6,12 +6,16 @@ using System.Text;
 namespace Tests.FilterTestGoup
 {
     public class TestFilter : Filter
-    { 
-        public string Name { get; set; }
+    {
+        [FilterProperty("Name")]
+        public string NameNotName { get; set; }
+        [FilterProperty(1,Test = EFSugar.Enumerations.FilterTest.LessThan)]
+        public int Balance { get; set; }
     }
 
     internal class TestFilter2: Filter
     {
+
         public int One { get; set; }
         public int Two { get; set; }
         public int Three { get; set; }

@@ -4,6 +4,7 @@ using System.Text;
 using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
+using EFSugar.Enumerations;
 
 namespace EFSugar.Filters
 {
@@ -13,7 +14,16 @@ namespace EFSugar.Filters
         public Expression OrderBy { get; set; }
         public PagingFilter PagingFilter { get; set; }
 
-        public string Origina_Address { get; set; }
+        private static Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>> FilterTestMap =
+            new Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>>()
+            {
+                { FilterTest.Equal, Expression.Equal},
+                { FilterTest.GreaterThan, Expression.GreaterThan },
+                { FilterTest.GreaterThanEqualTo, Expression.GreaterThanOrEqual },
+                { FilterTest.LessThan, Expression.LessThan },
+                { FilterTest.LessThanEqualTo, Expression.LessThanOrEqual},
+                { FilterTest.NotEqual, Expression.NotEqual }
+            };
 
         public virtual IQueryable<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
@@ -30,13 +40,14 @@ namespace EFSugar.Filters
                 if(filterValue.IsAssigned())
                 {
                     //get the filterproperty
-                    var filterAttr = prop.GetCustomAttribute<FilterProperty>();
+                    var filterAttr = prop.GetCustomAttribute<FilterProperty>() ?? default(FilterProperty);
                     
                     var propName = prop.Name;
                     //see which name to use
-                    if (filterAttr.IsAssigned() && !String.IsNullOrWhiteSpace(filterAttr.PropertyName))
+                    if (!String.IsNullOrWhiteSpace(filterAttr.PropertyName))
                     {
                         propName = filterAttr.PropertyName;
+
                     }
                     //get the propertyinfo from the entity
                     var entityProp = entityType.GetProperty(propName, _bindingFlags);
@@ -47,10 +58,10 @@ namespace EFSugar.Filters
                         var right = Expression.Constant(filterValue);
 
                         var subPredicate = Expression.Lambda<Func<T, bool>>(
-                        Expression.Equal(left, right),
+                        FilterTestMap[filterAttr.Test](left, right),
                         new[] { entityParam });
 
-                        predicate = predicate.And(subPredicate);
+                        predicate = filterAttr.Operation == FilterOperation.And ? predicate.And(subPredicate) : predicate.Or(subPredicate);
                     }
                 }
             }

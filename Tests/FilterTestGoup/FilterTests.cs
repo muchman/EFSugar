@@ -17,16 +17,20 @@ namespace Tests.FilterTestGoup
         {
             using (var db = new TestDbContext())
             {
-                db.Add(new TestClass() { Id = 1, Name = "Roger" });
-                db.Add(new TestClass() { Id = 2, Name = "Bilbo" });
+                db.Add(new TestClass() { Id = 1, Name = "Roger", Balance = 5});
+                db.Add(new TestClass() { Id = 2, Name = "Bilbo", Balance = 9});
+                db.Add(new TestClass() { Id = 3, Name = "Bilbo", Balance = 20 });
                 db.SaveChanges();
 
-                var filter = new TestFilter() { Name = "Bilbo" };
+                var filter = new TestFilter() { NameNotName = "Bilbo", Balance = 10 };
 
                 var query = db.Set<TestClass>().AsQueryable();
                 query = filter.ApplyFilter(query);
                 var results = query.ToList();
-               
+                results.Count.Should().Be(1);
+                results.First().Name.Should().Be("Bilbo");
+                results.First().Balance.Should().Be(9);
+
             }
         }
 
