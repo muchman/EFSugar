@@ -18,11 +18,11 @@ namespace EFSugar.Filters
             //this really only works if you have a pagesize, otherwise how many do you skip or take?
             if (PageSize > 0)
             {
-                result.Value = query.Skip((PageNumber > 0 ? PageNumber - 1 : 0) * PageSize).Take(PageSize);
+                result.Query = query.Skip((PageNumber > 0 ? PageNumber - 1 : 0) * PageSize).Take(PageSize);
             }
             else
             {
-                result.Value = query;
+                result.Query = query;
             }
             return result;
         }

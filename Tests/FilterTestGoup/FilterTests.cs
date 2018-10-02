@@ -92,7 +92,7 @@ namespace Tests.FilterTestGoup
 
                 var query = db.Set<TestClass2>().AsQueryable();
                 var res = filter.ApplyFilter(query);
-                var results = res.Value.ToList();
+                var results = res.Query.ToList();
 
             }
         }
