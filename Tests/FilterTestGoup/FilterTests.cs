@@ -7,6 +7,8 @@ using Xunit;
 using System.Linq.Expressions;
 using EFSugar;
 using FluentAssertions;
+using EFSugar.Filters;
+using EFSugar.Enumerations;
 
 namespace Tests.FilterTestGoup
 {
@@ -25,7 +27,8 @@ namespace Tests.FilterTestGoup
                 var filter = new TestFilter() { NameNotName = "Bilbo", Balance = 10 };
 
                 var query = db.Set<TestClass>().AsQueryable();
-                query = filter.ApplyFilter(query);
+
+
                 var results = query.ToList();
                 results.Count.Should().Be(1);
                 results.First().Name.Should().Be("Bilbo");
@@ -67,6 +70,30 @@ namespace Tests.FilterTestGoup
 
                 query.Where(wrong).ToList().Count.Should().Be(1);
                 query.Where(correct).ToList().Count.Should().Be(0);
+            }
+        }
+
+        [Fact]
+        public void SortByTest()
+        {
+            using (var db = new TestDbContext())
+            {
+                db.Add(new TestClass2() { Id = 1, One = 1});
+                db.Add(new TestClass2() { Id = 2, One = 3 });
+                db.Add(new TestClass2() { Id = 3, One = 2 });
+                db.Add(new TestClass2() { Id = 4, One = 5 });
+                db.Add(new TestClass2() { Id = 5, One = 4 });
+                db.Add(new TestClass2() { Id = 6, One = 7 });
+                db.Add(new TestClass2() { Id = 7, One = 6 });
+                db.SaveChanges();
+
+                var filter = new TestFilter2();
+                filter.OrderByProperty(f => f.One, OrderByDirection.Ascending);
+
+                var query = db.Set<TestClass2>().AsQueryable();
+                var res = filter.ApplyFilter(query);
+                var results = res.Value.ToList();
+
             }
         }
     }

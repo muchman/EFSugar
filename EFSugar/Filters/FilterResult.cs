@@ -6,7 +6,7 @@ namespace EFSugar.Filters
 {
     public class FilterResult<T>
     {
-        public T Result { get; set; }
+        public T Value { get; set; }
         public int RecordCount { get; set; }
     }
 }

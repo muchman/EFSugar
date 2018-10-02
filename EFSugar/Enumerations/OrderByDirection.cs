@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EFSugar.Enumerations
 {
-    public enum SortDirection
+    public enum OrderByDirection
     {
         Ascending,
         Descending

@@ -52,9 +52,9 @@ namespace EFSugar
             return prop.GetValue(instance).IsAssigned();
         }
 
-        public static IOrderedQueryable<TSource> OrderBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, SortDirection direction)
+        public static IOrderedQueryable<TSource> OrderBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, OrderByDirection direction)
         {
-            if (direction == SortDirection.Ascending)
+            if (direction == OrderByDirection.Ascending)
             {
                 return source.OrderBy(keySelector);
             }
