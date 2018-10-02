@@ -11,7 +11,7 @@ namespace EFSugar.Filters
     public class OrderByFilter
     {
         private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.IgnoreCase;
-        public OrderByDirection SortDirection { get; set; }
+        public OrderByDirection OrderByDirection { get; set; }
         public string PropertyName { get; set; }
         public IQueryable<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
@@ -32,7 +32,7 @@ namespace EFSugar.Filters
                 }
             }
 
-            var command = SortDirection == OrderByDirection.Descending ? "OrderByDescending" : "OrderBy";
+            var command = OrderByDirection == OrderByDirection.Descending ? "OrderByDescending" : "OrderBy";
             var parameter = Expression.Parameter(type, "p");
             var propertyAccess = Expression.MakeMemberAccess(parameter, prop);
             var orderByExpression = Expression.Lambda(propertyAccess, parameter);

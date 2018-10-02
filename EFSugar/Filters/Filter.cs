@@ -11,11 +11,9 @@ namespace EFSugar.Filters
     public class Filter
     {
         private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.IgnoreCase;
-        public OrderByDirection OrderByDirection { get { return _OrderByFilter.SortDirection; } set { _OrderByFilter.SortDirection = value; } }
-        public int PageNumber { get { return _PagingFilter.PageNumber; } set { _PagingFilter.PageNumber = value; } }
-        public int PageSize { get { return _PagingFilter.PageSize; } set { _PagingFilter.PageSize = value; } }
 
-        public string PropertyName { get { return _OrderByFilter.PropertyName; } set { _OrderByFilter.PropertyName = value; } }
+        internal OrderByDirection OrderByDirection { get { return _OrderByFilter.OrderByDirection; } set { _OrderByFilter.OrderByDirection = value; } }
+        internal string PropertyName { get { return _OrderByFilter.PropertyName; } set { _OrderByFilter.PropertyName = value; } }
 
         private OrderByFilter _OrderByFilter = new OrderByFilter();
         private PagingFilter _PagingFilter = new PagingFilter();
@@ -32,11 +30,18 @@ namespace EFSugar.Filters
                 { FilterTest.NotEqual, Expression.NotEqual }
             };
 
-        public void OrderByProperty(string propertyName,  OrderByDirection direction)
+        public void SetOrderBy(string propertyName,  OrderByDirection direction)
         {
-            PropertyName = propertyName;
-            OrderByDirection = direction;
+            _OrderByFilter.PropertyName = propertyName;
+            _OrderByFilter.OrderByDirection = direction;
         }
+
+        public void SetPaging(int pageNumber, int pageSize) 
+        {
+            _PagingFilter.PageNumber = pageNumber;
+            _PagingFilter.PageSize = pageSize;
+        }
+
 
         public virtual FilterResult<IQueryable<T>> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
@@ -91,7 +96,8 @@ namespace EFSugar.Filters
     //I need a way to self reference the filter.  I cant say this T inside of the filter and I cant expose the properties another way that I know of
     public static class FilterExtension
     {
-        public static void OrderByProperty<T>(this T filter, Expression<Func<T, object>> expression, OrderByDirection direction) where T : Filter
+
+        public static void SetOrderBy<T>(this T filter, Expression<Func<T, object>> expression, OrderByDirection direction) where T : Filter
         {
             filter.OrderByDirection = direction;
 

@@ -88,7 +88,7 @@ namespace Tests.FilterTestGoup
                 db.SaveChanges();
 
                 var filter = new TestFilter2();
-                filter.OrderByProperty(f => f.One, OrderByDirection.Ascending);
+                filter.SetOrderBy(f => f.One, OrderByDirection.Ascending);
 
                 var query = db.Set<TestClass2>().AsQueryable();
                 var res = filter.ApplyFilter(query);
