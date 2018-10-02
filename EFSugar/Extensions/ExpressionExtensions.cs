@@ -47,9 +47,10 @@ namespace EFSugar
             return !(EqualityComparer<T>.Default.Equals(item, default(T)));
         }
 
-        public static bool IsAssigned(this object instance, PropertyInfo prop)
+        public static bool IsAssigned<T>(this T item, PropertyInfo prop)
         {
-            return prop.GetValue(instance).IsAssigned();
+            var value = Activator.CreateInstance(prop.PropertyType);
+            return !(Equals(item, value));
         }
 
         public static IOrderedQueryable<TSource> OrderBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, OrderByDirection direction)

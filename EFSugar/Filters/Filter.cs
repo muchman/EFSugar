@@ -10,7 +10,7 @@ namespace EFSugar.Filters
 {
     public class Filter
     {
-        private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.IgnoreCase;
+        private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
 
         internal OrderByDirection OrderByDirection { get { return _OrderByFilter.OrderByDirection; } set { _OrderByFilter.OrderByDirection = value; } }
         internal string PropertyName { get { return _OrderByFilter.PropertyName; } set { _OrderByFilter.PropertyName = value; } }
@@ -56,8 +56,8 @@ namespace EFSugar.Filters
 
             foreach (var prop in this.GetType().GetProperties(_BindingFlags))
             {
-                var filterValue = Convert.ChangeType(prop.GetValue(this), prop.PropertyType);
-                if(filterValue.IsAssigned())
+                var propValue = prop.GetValue(this);
+                if(propValue.IsAssigned(prop))
                 {
                     //get the filterproperty
                     var filterAttr = prop.GetCustomAttribute<FilterProperty>() ?? default(FilterProperty);
@@ -75,7 +75,7 @@ namespace EFSugar.Filters
                     if(entityProp != null)
                     {
                         var left = Expression.Property(entityParam, entityProp);
-                        var right = Expression.Constant(filterValue);
+                        var right = Expression.Constant(propValue);
 
                         var subPredicate = Expression.Lambda<Func<T, bool>>(
                         FilterTestMap[filterAttr.Test](left, right),

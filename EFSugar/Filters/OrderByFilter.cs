@@ -10,7 +10,7 @@ namespace EFSugar.Filters
 {
     public class OrderByFilter
     {
-        private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.IgnoreCase;
+        private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
         public OrderByDirection OrderByDirection { get; set; }
         public string PropertyName { get; set; }
         public IQueryable<T> ApplyFilter<T>(IQueryable<T> query) where T : class
