@@ -5,14 +5,14 @@ using System.Text;
 
 namespace Tests.FilterTestGoup
 {
-    internal class TestClass
+    public class TestClass
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public int Balance { get; set; }
     }
 
-    internal class TestClass2
+    public class TestClass2
     {
         public int Id { get; set; }
         public int One { get; set; }

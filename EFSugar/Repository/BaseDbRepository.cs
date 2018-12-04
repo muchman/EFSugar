@@ -4,24 +4,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace EFSugar
+namespace EFSugar.Repository
 {
     public class BaseDbRepository<T> : IBaseDbRepository where T : DbContext
     {
-        protected T DBContext { get; }
-        private IServiceProvider _serviceProvider { get; }
+        public DbContext DBContext { get; }
+        private static IEnumerable<PropertyInfo> PropertyInfoCollection { get; set; }
         private bool _deferred;
 
-        public BaseDbRepository(T context)
+        public BaseDbRepository(T context, IServiceProvider serviceProvider)
         {
             DBContext = context;
-            var type = this.GetType();
-            var properties = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(pi => typeof(IRepositoryGroup).IsAssignableFrom(pi.PropertyType));
 
-            foreach (var prop in properties)
+            if(PropertyInfoCollection == null)
             {
-                var instance = Activator.CreateInstance(prop.PropertyType, DBContext, this);
-                prop.SetValue(this, instance);
+                PropertyInfoCollection = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(pi => typeof(IRepositoryGroup).IsAssignableFrom(pi.PropertyType));
+            }
+            
+            foreach (var prop in PropertyInfoCollection)
+            {
+                var group = serviceProvider.GetService(prop.PropertyType) as IRepositoryGroup;
+                group.ParentBaseRepository = this;
+                prop.SetValue(this, group);
             }
         }
 

@@ -4,59 +4,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace EFSugar
+namespace EFSugar.Repository
 {
-    public interface IRepositoryGroup
+    public abstract class RepositoryGroup<TEntity> : IRepositoryGroup where TEntity : class
     {
+        public IBaseDbRepository ParentBaseRepository { get; set; }
 
-    }
-    public abstract class RepositoryGroup<TEntity, TKey> : IRepositoryGroup where TEntity : class
-    {
-        protected DbContext DBContext;
-        private IBaseDbRepository ParentBaseFunctions { get; set; }
-
-
-        public RepositoryGroup(DbContext context, IBaseDbRepository parent)
+        public virtual TEntity GetSingle(object key)
         {
-            DBContext = context;
-            ParentBaseFunctions = parent;
-        }
-
-        public RepositoryGroup()
-        {
-        }
-        public virtual TEntity GetSingle(TKey key)
-        {
-            return ParentBaseFunctions.GetSingle<TEntity>(key);
+            return ParentBaseRepository.GetSingle<TEntity>(key);
         }
 
         public virtual IEnumerable<TEntity> GetAll()
         {
-            return ParentBaseFunctions.GetAll<TEntity>();
+            return ParentBaseRepository.GetAll<TEntity>();
         }
 
         public virtual void Update(TEntity entity)
         {
-            ParentBaseFunctions.Update(entity);
+            ParentBaseRepository.Update(entity);
         }
 
         protected virtual IQueryable<TEntity> GetQueryable()
         {
-            return ParentBaseFunctions.GetQueryable<TEntity>();
+            return ParentBaseRepository.GetQueryable<TEntity>();
         }
 
         public virtual TEntity Create(TEntity entity)
         {
-            return ParentBaseFunctions.Create(entity);
+            return ParentBaseRepository.Create(entity);
         }
 
         public virtual void Delete(TEntity entity)
         {
-            ParentBaseFunctions.Delete(entity);
+            ParentBaseRepository.Delete(entity);
         }
         protected DbSet<T> Set<T>() where T : class
         {
-            return DBContext.Set<T>();
+            return ParentBaseRepository.DBContext.Set<T>();
         }
     }
 }

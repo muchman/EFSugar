@@ -13,7 +13,7 @@ namespace Tests.FilterTestGoup
         public int Balance { get; set; }
     }
 
-    internal class TestFilter2: Filter
+    public class TestFilter2: Filter
     {
 
         public int? One { get; set; }

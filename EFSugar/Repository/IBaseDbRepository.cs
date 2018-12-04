@@ -1,12 +1,14 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace EFSugar
+namespace EFSugar.Repository
 {
     public interface IBaseDbRepository
     {
+        DbContext DBContext { get; }
         TEntity Create<TEntity>(TEntity entity) where TEntity : class;
         void Delete<TEntity>(TEntity entity) where TEntity : class;
         void SaveChanges();
