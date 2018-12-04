@@ -1,12 +1,11 @@
-﻿using EFSugar.Enumerations;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace EFSugar
+namespace EFSugar.Filters
 {
     /* Note: You dont need this Expression stuff at all, it is just syntax sugar.  Otherwise you write stuff like:
      *

@@ -4,7 +4,6 @@ using System.Text;
 using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
-using EFSugar.Enumerations;
 
 namespace EFSugar.Filters
 {
@@ -30,7 +29,8 @@ namespace EFSugar.Filters
                 { FilterTest.NotEqual, Expression.NotEqual }
             };
 
-        public void SetOrderBy(string propertyName,  OrderByDirection direction)
+        //string based orderby, there is an extension for this also
+        public void SetOrderBy(string propertyName, OrderByDirection direction)
         {
             _OrderByFilter.PropertyName = propertyName;
             _OrderByFilter.OrderByDirection = direction;
@@ -90,30 +90,6 @@ namespace EFSugar.Filters
             query = _OrderByFilter.ApplyFilter(query);
 
             return _PagingFilter.ApplyFilter(query);
-        }
-    }
-
-    //I need a way to self reference the filter.  I cant say this T inside of the filter and I cant expose the properties another way that I know of
-    public static class FilterExtension
-    {
-
-        public static void SetOrderBy<T>(this T filter, Expression<Func<T, object>> expression, OrderByDirection direction) where T : Filter
-        {
-            filter.OrderByDirection = direction;
-
-            var unaryExpression = (UnaryExpression)expression.Body;
-            var memberExpression = ((MemberExpression)unaryExpression.Operand);
-
-            var filterProperty = memberExpression.Member.GetCustomAttribute<FilterProperty>();
-
-            if(filterProperty != null && !String.IsNullOrWhiteSpace(filterProperty.PropertyName))
-            {
-                filter.PropertyName = filterProperty.PropertyName;
-            }
-            else
-            {
-                filter.PropertyName = memberExpression.Member.Name;
-            }
         }
     }
 }

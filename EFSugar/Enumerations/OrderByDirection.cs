@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EFSugar.Enumerations
+namespace EFSugar.Filters
 {
     public enum OrderByDirection
     {

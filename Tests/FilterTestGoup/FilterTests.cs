@@ -8,7 +8,6 @@ using System.Linq.Expressions;
 using EFSugar;
 using FluentAssertions;
 using EFSugar.Filters;
-using EFSugar.Enumerations;
 
 namespace Tests.FilterTestGoup
 {

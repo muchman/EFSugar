@@ -1,9 +1,5 @@
-﻿using EFSugar.Extensions;
-using EFSugar.Repository;
+﻿using EFSugar;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Tests.FakeDatabase;
 using Xunit;
 

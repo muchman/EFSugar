@@ -9,7 +9,7 @@ namespace Tests.FilterTestGoup
     {
         [FilterProperty("Name")]
         public string NameNotName { get; set; }
-        [FilterProperty(1,Test = EFSugar.Enumerations.FilterTest.LessThan)]
+        [FilterProperty(1,Test = FilterTest.LessThan)]
         public int Balance { get; set; }
     }
 
