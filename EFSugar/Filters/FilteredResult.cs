@@ -4,10 +4,9 @@ using System.Text;
 
 namespace EFSugar.Filters
 {
-    public class FilterResult<T>
+    public class FilteredResult<T>
     {
-
-        public T Query { get; set; }
+        public IEnumerable<T> Value { get; set; }
         public int RecordCount { get; set; }
     }
 }

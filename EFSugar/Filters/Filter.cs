@@ -43,7 +43,7 @@ namespace EFSugar.Filters
         }
 
 
-        public virtual FilterResult<IQueryable<T>> ApplyFilter<T>(IQueryable<T> query) where T : class
+        public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
             ParameterExpression entityParam = Expression.Parameter(typeof(T));
             var expressionGroups = new Dictionary<int, Expression<Func<T, bool>>>();

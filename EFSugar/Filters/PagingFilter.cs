@@ -10,9 +10,9 @@ namespace EFSugar.Filters
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
 
-        public FilterResult<IQueryable<T>> ApplyFilter<T>(IQueryable<T> query) where T : class
+        public FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
-            var result = new FilterResult<IQueryable<T>>();
+            var result = new FilteredQuery<T>();
             result.RecordCount = query.Count();
 
             //this really only works if you have a pagesize, otherwise how many do you skip or take?
