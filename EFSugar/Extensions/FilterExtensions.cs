@@ -50,10 +50,10 @@ namespace EFSugar.Filters
             return repository.DBContext.Filter<T>(filter).Resolve();
         }
 
-        internal static PropertyInfo WalkToPropByName(this Type type, String name, BindingFlags flags)
+        internal static PropertyInfo WalkToPropByName(this Type type, string name, BindingFlags flags)
         {
             PropertyInfo currentProp = null;
-            foreach (String part in name.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (string part in name.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 if(currentProp != null)
                 {
