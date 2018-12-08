@@ -14,5 +14,7 @@ namespace Tests.FilterTestGoup
         public string PName { get; set; }
         public int? Value { get; set; }
         public int? OrderTypeId { get; set; }
+        [FilterProperty("OrderType.Id")]
+        public int? NestedOrderTypeId { get; set; }
     }
 }

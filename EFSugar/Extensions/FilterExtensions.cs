@@ -49,5 +49,22 @@ namespace EFSugar.Filters
         {
             return repository.DBContext.Filter<T>(filter).Resolve();
         }
+
+        internal static PropertyInfo GetPropByName(this Type type, String name, BindingFlags flags)
+        {
+            PropertyInfo currentProp = null;
+            foreach (String part in name.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if(currentProp != null)
+                {
+                    currentProp = currentProp.PropertyType.GetProperty(part, flags);
+                }
+                else
+                {
+                    currentProp = type.GetProperty(part, flags);
+                }               
+            }
+            return currentProp;
+        }
     }
 }

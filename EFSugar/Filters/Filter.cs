@@ -45,7 +45,7 @@ namespace EFSugar.Filters
 
             List<Filter> lis = new List<Filter>();
 
-            Expression<Func<T, bool>> predicate = s => true;
+            Expression<Func<T, bool>> predicate = null;
 
 
             foreach (var prop in this.GetType().GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(ReflectIgnoreAttribute))))
@@ -64,19 +64,24 @@ namespace EFSugar.Filters
 
                     }
                     //get the propertyinfo from the entity
-                    var entityProp = entityType.GetProperty(propName, _BindingFlags);
+                    //var entityProp = entityType.GetProperty(propName, _BindingFlags);
 
-                    if(entityProp != null)
-                    {
-                        var left = Expression.Property(entityParam, entityProp);
+                    //if(entityProp != null)
+                    //{
+                        var left = (Expression)entityParam;
+                        foreach (string name in propName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            left = Expression.PropertyOrField(left, name);
+                        }//var left = Expression.Property(entityParam, entityProp);
                         var right = Expression.Constant(propValue);
 
                         var subPredicate = Expression.Lambda<Func<T, bool>>(
                         FilterTestMap[filterAttr?.Test ?? FilterTest.Equal](left, right),
                         new[] { entityParam });
 
-                        predicate = predicate.And(subPredicate);//this will need reworked for grouping
-                    }
+                        predicate = predicate != null ? predicate.And(subPredicate) : subPredicate;
+                        //predicate = predicate.And(subPredicate);//this will need reworked for grouping
+                    //}
                 }
             }
 

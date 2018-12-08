@@ -45,12 +45,31 @@ namespace Tests.RepoTests
 
             ((TestDbContext)repo.DBContext).SeedData();
 
+            var filter = new OrderFilter() { NestedOrderTypeId = 1, UId = 1 };
+
+            //should be 2
+            var orders = repo.Filter<Order>(filter);
+            orders.RecordCount.Should().Be(3);
+                       
+        }
+
+        [Fact]
+        public void NestedPropertyTest()
+        {
+            var services = new ServiceCollection();
+            RegisterServices(services);
+            var servicesProvider = services.BuildServiceProvider();
+            var repo = servicesProvider.GetService<FakeRepo>();
+
+
+            ((TestDbContext)repo.DBContext).SeedData();
+
             var filter = new OrderFilter() { UId = 1, PName = "Shoes" };
 
-            //should be 3
+            //should be 2
             var orders = repo.Filter<Order>(filter);
             orders.RecordCount.Should().Be(2);
-                       
+
         }
 
         [Fact]
@@ -78,7 +97,6 @@ namespace Tests.RepoTests
             orders.RecordCount.Should().Be(25);
             orders.Value.Count().Should().Be(5);
             orders.Value.First().Id.Should().Be(7);
-
         }
 
     }
