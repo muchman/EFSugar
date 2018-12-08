@@ -11,6 +11,7 @@ namespace EFSugar.Filters
 {
 
     //I need a way to self reference the filter.  I cant say this T inside of the filter and I cant expose the properties another way that I know of
+    //Since filter properties are not known to use, this was the only way to allow the type to be generic without affecting the base class
     public static class FilterExtensions
     {
 
@@ -25,11 +26,11 @@ namespace EFSugar.Filters
 
             if (filterProperty != null && !String.IsNullOrWhiteSpace(filterProperty.PropertyName))
             {
-                filter.PropertyName = filterProperty.PropertyName;
+                filter.OrderByPropertyName = filterProperty.PropertyName;
             }
             else
             {
-                filter.PropertyName = memberExpression.Member.Name;
+                filter.OrderByPropertyName = memberExpression.Member.Name;
             }
         }
 
@@ -44,9 +45,9 @@ namespace EFSugar.Filters
             return query.Filter(filter);
         }
 
-        public static FilteredQuery<T> Filter<T>(this IBaseDbRepository repository, Filter filter) where T : class
+        public static FilteredResult<T> Filter<T>(this IBaseDbRepository repository, Filter filter) where T : class
         {
-            return repository.DBContext.Filter<T>(filter);
+            return repository.DBContext.Filter<T>(filter).Resolve();
         }
     }
 }

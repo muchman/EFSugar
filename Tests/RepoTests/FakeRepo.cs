@@ -9,6 +9,5 @@ namespace Tests.RepoTests
     public class FakeRepo : BaseDbRepository<TestDbContext>
     {
         public FakeRepo(TestDbContext context, IServiceProvider provider) : base(context, provider) { }
-        public FakeRepoGroup TestGroup { get; set; }
     }
 }

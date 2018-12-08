@@ -48,8 +48,15 @@ namespace EFSugar.Filters
 
         public static bool IsAssigned<T>(this T item, PropertyInfo prop)
         {
-            var value = Activator.CreateInstance(prop.PropertyType);
-            return !(Equals(item, value));
+            if (prop.PropertyType.GetConstructor(Type.EmptyTypes) == null)
+            {
+                var value = Activator.CreateInstance(prop.PropertyType);
+                return !(Equals(item, value));
+            }
+            else
+            {
+                return item != null;
+            }
         }
 
         public static IOrderedQueryable<TSource> OrderBy<TSource, TKey>(this IQueryable<TSource> source, Expression<Func<TSource, TKey>> keySelector, OrderByDirection direction)

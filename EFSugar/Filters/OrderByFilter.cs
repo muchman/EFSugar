@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -19,7 +20,8 @@ namespace EFSugar.Filters
 
             if(String.IsNullOrWhiteSpace(PropertyName))
             {
-                //find it
+                var props = type.GetProperties();
+                prop = props.First(p => p.Name.ToLower() == "id" || Attribute.IsDefined(p, typeof(KeyAttribute))) ?? props.First();
             }
             else
             {

@@ -10,37 +10,31 @@ namespace EFSugar.Filters
     public class Filter
     {
         private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
-
-        internal OrderByDirection OrderByDirection { get { return _OrderByFilter.OrderByDirection; } set { _OrderByFilter.OrderByDirection = value; } }
-        internal string PropertyName { get { return _OrderByFilter.PropertyName; } set { _OrderByFilter.PropertyName = value; } }
-
         private OrderByFilter _OrderByFilter = new OrderByFilter();
         private PagingFilter _PagingFilter = new PagingFilter();
 
-
+        //TODO: rework how this is handled, I didnt want people to import the expression stuff just to define the type of comparar they wanted
         private static Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>> FilterTestMap =
             new Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>>()
             {
-                { FilterTest.Equal, Expression.Equal},
-                { FilterTest.GreaterThan, Expression.GreaterThan },
-                { FilterTest.GreaterThanEqualTo, Expression.GreaterThanOrEqual },
-                { FilterTest.LessThan, Expression.LessThan },
-                { FilterTest.LessThanEqualTo, Expression.LessThanOrEqual},
-                { FilterTest.NotEqual, Expression.NotEqual }
+                        { FilterTest.Equal, Expression.Equal},
+                        { FilterTest.GreaterThan, Expression.GreaterThan },
+                        { FilterTest.GreaterThanEqualTo, Expression.GreaterThanOrEqual },
+                        { FilterTest.LessThan, Expression.LessThan },
+                        { FilterTest.LessThanEqualTo, Expression.LessThanOrEqual},
+                        { FilterTest.NotEqual, Expression.NotEqual }
             };
 
-        //string based orderby, there is an extension for this also
-        public void SetOrderBy(string propertyName, OrderByDirection direction)
-        {
-            _OrderByFilter.PropertyName = propertyName;
-            _OrderByFilter.OrderByDirection = direction;
-        }
+        //I made these order and page things public so they can ultimatly be passed into controllers directly by js frameworks without calling additional functions
+        [ReflectIgnore]
+        public OrderByDirection OrderByDirection { get { return _OrderByFilter.OrderByDirection; } set { _OrderByFilter.OrderByDirection = value; } }
+        [ReflectIgnore]
+        public string OrderByPropertyName { get { return _OrderByFilter.PropertyName; } set { _OrderByFilter.PropertyName = value; } }
+        [ReflectIgnore]
+        public int PageSize { get { return _PagingFilter.PageSize; } set { _PagingFilter.PageSize = value; } }
+        [ReflectIgnore]
+        public int PageNumber { get { return _PagingFilter.PageNumber; } set { _PagingFilter.PageNumber = value; } }
 
-        public void SetPaging(int pageNumber, int pageSize) 
-        {
-            _PagingFilter.PageNumber = pageNumber;
-            _PagingFilter.PageSize = pageSize;
-        }
 
 
         public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
@@ -54,17 +48,17 @@ namespace EFSugar.Filters
             Expression<Func<T, bool>> predicate = s => true;
 
 
-            foreach (var prop in this.GetType().GetProperties(_BindingFlags))
+            foreach (var prop in this.GetType().GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(ReflectIgnoreAttribute))))
             {
                 var propValue = prop.GetValue(this);
-                if(propValue.IsAssigned(prop))
+                if(propValue != null)
                 {
                     //get the filterproperty
                     var filterAttr = prop.GetCustomAttribute<FilterProperty>() ?? default(FilterProperty);
                     
                     var propName = prop.Name;
                     //see which name to use
-                    if (!String.IsNullOrWhiteSpace(filterAttr.PropertyName))
+                    if (!String.IsNullOrWhiteSpace(filterAttr?.PropertyName))
                     {
                         propName = filterAttr.PropertyName;
 
@@ -78,10 +72,10 @@ namespace EFSugar.Filters
                         var right = Expression.Constant(propValue);
 
                         var subPredicate = Expression.Lambda<Func<T, bool>>(
-                        FilterTestMap[filterAttr.Test](left, right),
+                        FilterTestMap[filterAttr?.Test ?? FilterTest.Equal](left, right),
                         new[] { entityParam });
 
-                        predicate = filterAttr.Operation == FilterOperation.And ? predicate.And(subPredicate) : predicate.Or(subPredicate);
+                        predicate = predicate.And(subPredicate);//this will need reworked for grouping
                     }
                 }
             }
