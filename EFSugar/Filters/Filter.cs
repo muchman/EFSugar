@@ -43,10 +43,7 @@ namespace EFSugar.Filters
             var expressionGroups = new Dictionary<int, Expression<Func<T, bool>>>();
             var entityType = typeof(T);
 
-            List<Filter> lis = new List<Filter>();
-
             Expression<Func<T, bool>> predicate = null;
-
 
             foreach (var prop in this.GetType().GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(ReflectIgnoreAttribute))))
             {
@@ -72,7 +69,7 @@ namespace EFSugar.Filters
                         foreach (string name in propName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
                         {
                             left = Expression.PropertyOrField(left, name);
-                        }//var left = Expression.Property(entityParam, entityProp);
+                        }
                         var right = Expression.Constant(propValue);
 
                         var subPredicate = Expression.Lambda<Func<T, bool>>(
@@ -80,8 +77,7 @@ namespace EFSugar.Filters
                         new[] { entityParam });
 
                         predicate = predicate != null ? predicate.And(subPredicate) : subPredicate;
-                        //predicate = predicate.And(subPredicate);//this will need reworked for grouping
-                    //}
+                    
                 }
             }
 
