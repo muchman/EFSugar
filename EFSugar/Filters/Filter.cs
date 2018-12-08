@@ -48,11 +48,11 @@ namespace EFSugar.Filters
             foreach (var prop in this.GetType().GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(ReflectIgnoreAttribute))))
             {
                 var propValue = prop.GetValue(this);
-                if(propValue != null)
+                if (propValue != null)
                 {
                     //get the filterproperty
                     var filterAttr = prop.GetCustomAttribute<FilterProperty>() ?? default(FilterProperty);
-                    
+
                     var propName = prop.Name;
                     //see which name to use
                     if (!String.IsNullOrWhiteSpace(filterAttr?.PropertyName))
@@ -60,24 +60,22 @@ namespace EFSugar.Filters
                         propName = filterAttr.PropertyName;
 
                     }
-                    //get the propertyinfo from the entity
-                    //var entityProp = entityType.GetProperty(propName, _BindingFlags);
 
-                    //if(entityProp != null)
-                    //{
-                        var left = (Expression)entityParam;
-                        foreach (string name in propName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
-                        {
-                            left = Expression.PropertyOrField(left, name);
-                        }
-                        var right = Expression.Constant(propValue);
+                    //build the predicate.  We walk the string split incase we have a nested property, this way also negates the need to
+                    //find the propertyinfo for this thing.  Its less safe but will be much faster
+                    var left = (Expression)entityParam;
+                    foreach (string name in propName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        left = Expression.PropertyOrField(left, name);
+                    }
+                    var right = Expression.Constant(propValue);
 
-                        var subPredicate = Expression.Lambda<Func<T, bool>>(
-                        FilterTestMap[filterAttr?.Test ?? FilterTest.Equal](left, right),
-                        new[] { entityParam });
+                    var subPredicate = Expression.Lambda<Func<T, bool>>(
+                    FilterTestMap[filterAttr?.Test ?? FilterTest.Equal](left, right),
+                    new[] { entityParam });
 
-                        predicate = predicate != null ? predicate.And(subPredicate) : subPredicate;
-                    
+                    predicate = predicate != null ? predicate.And(subPredicate) : subPredicate;
+
                 }
             }
 
