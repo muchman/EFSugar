@@ -26,13 +26,13 @@ namespace EFSugar.Filters
             };
 
         //I made these order and page things public so they can ultimatly be passed into controllers directly by js frameworks without calling additional functions
-        [ReflectIgnore]
+        [FilterIgnore]
         public OrderByDirection OrderByDirection { get { return _OrderByFilter.OrderByDirection; } set { _OrderByFilter.OrderByDirection = value; } }
-        [ReflectIgnore]
+        [FilterIgnore]
         public string OrderByPropertyName { get { return _OrderByFilter.PropertyName; } set { _OrderByFilter.PropertyName = value; } }
-        [ReflectIgnore]
+        [FilterIgnore]
         public int PageSize { get { return _PagingFilter.PageSize; } set { _PagingFilter.PageSize = value; } }
-        [ReflectIgnore]
+        [FilterIgnore]
         public int PageNumber { get { return _PagingFilter.PageNumber; } set { _PagingFilter.PageNumber = value; } }
 
         public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
@@ -43,7 +43,7 @@ namespace EFSugar.Filters
 
             Expression<Func<T, bool>> predicate = null;
 
-            foreach (var prop in this.GetType().GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(ReflectIgnoreAttribute))))
+            foreach (var prop in this.GetType().GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(FilterIgnoreAttribute))))
             {
                 var propValue = prop.GetValue(this);
                 if (propValue != null)

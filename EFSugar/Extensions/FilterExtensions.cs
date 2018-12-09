@@ -36,7 +36,7 @@ namespace EFSugar.Filters
 
         public static FilteredQuery<T> Filter<T>(this IQueryable<T> query, Filter filter) where T : class
         {
-            return filter.ApplyFilter<T>(query);
+            return filter.ApplyFilter(query);
         }
 
         public static FilteredQuery<T> Filter<T>(this DbContext context, Filter filter) where T : class

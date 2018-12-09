@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EFSugar.Filters
 {
-    public class ReflectIgnoreAttribute : Attribute
+    public class FilterIgnoreAttribute : Attribute
     {
     }
 }
