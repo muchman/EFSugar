@@ -2,6 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>EFCoreSugar</PackageId>
+    <Authors>Mike Uchman</Authors>
+    <Company />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageIconUrl>https://github.com/muchman/EFSugar/blob/master/ef_sugar_icon.png?raw=true</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/muchman/EFSugar</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/muchman/EFSugar</PackageLicenseUrl>
+    <Copyright>2018</Copyright>
+    <Description>Package to assist in boilerplate of repositories and predicate building with filter objects</Description>
+    <PackageTags>EntityFrameworkCore Repository Predicate Sugar</PackageTags>
+    <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
