@@ -17,4 +17,13 @@ namespace Tests.FilterTestGoup
         [FilterProperty("OrderType.Id")]
         public int? NestedOrderTypeId { get; set; }
     }
+
+    public class UserFilter : Filter
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public DateTime DOB { get; set; }
+        public int Age { get; set; }
+    }
 }

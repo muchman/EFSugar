@@ -35,8 +35,6 @@ namespace EFSugar.Filters
         [ReflectIgnore]
         public int PageNumber { get { return _PagingFilter.PageNumber; } set { _PagingFilter.PageNumber = value; } }
 
-
-
         public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
             ParameterExpression entityParam = Expression.Parameter(typeof(T));

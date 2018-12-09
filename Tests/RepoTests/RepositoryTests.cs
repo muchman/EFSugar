@@ -23,18 +23,6 @@ namespace Tests.RepoTests
         }
 
         [Fact]
-        public void RepoInstantiator()
-        {
-            var services = new ServiceCollection();
-            RegisterServices(services);
-            var servicesProvider = services.BuildServiceProvider();
-            servicesProvider.GetService<FakeRepo>();
-            servicesProvider.GetService<FakeRepo>();
-        }
-
-
-
-        [Fact]
         public void FilterExtensionTest()
         {
             var services = new ServiceCollection();
@@ -47,7 +35,7 @@ namespace Tests.RepoTests
 
             var filter = new OrderFilter() { NestedOrderTypeId = 1, UId = 1 };
 
-            //should be 2
+            //should be 3
             var orders = repo.Filter<Order>(filter);
             orders.RecordCount.Should().Be(3);
                        
@@ -92,7 +80,8 @@ namespace Tests.RepoTests
             orders.Value.First().UserId.Should().Be(1);
 
             //advance the page and we should have same record count but starting on the 6th record
-            filter = new OrderFilter() { OrderTypeId = 1, PageNumber = 2, PageSize = 5 };
+            filter.PageNumber = 2;
+            filter.PageSize = 5;
             orders = repo.Filter<Order>(filter);
             orders.RecordCount.Should().Be(25);
             orders.Value.Count().Should().Be(5);
