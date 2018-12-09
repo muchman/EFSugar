@@ -13,9 +13,7 @@ query.Where(order => OrderFilter.Id != 0 ? order.Id == OrderFilter.Id : true &&
 EFCore Sugar is opinionated in that it does not favor a pattern of repository for every entity type.  This often leads to injecting several different “repositories” just to access all the data you need in a service.  Instead this library introduces the idea of a repository grouping which is a fancy way of saying boxing functionality in the repository.  This idea allows us to create separation of functionality inside the repository while still only having to inject a single repository into our services.
 
 ## Installation
----
 
-OS X & Linux:
 
 From Package Manager Console:
 ```sh
@@ -29,7 +27,7 @@ dotnet add package EFCoreSugar
 
 
 ## Usage example
----
+
 ### **BaseDbRepository**
 
 Repositories should all inherit from BaseDbRepository\<Your DbContext> and it's interface, if you chose to have one, should inherit from IBaseDbRepository to ensure functionality works with injection patterns.  A special note is that all repo groups will share the same DbContext as the main repo they are contained in.  This is Intentional to leverage caching in the DbContext across all the groups.  It is called DBContext inside the BaseDbRepository and its DbSets can be accessed with Set\<T>() in the RepositoryGroup.
@@ -192,5 +190,8 @@ public void FilterStuff()
 
 ## Release History
 
+* 1.0.1
+    * Exposed the FilterIgnore attribute
 * 1.0.0
     * Initial Release
+
