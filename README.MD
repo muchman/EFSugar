@@ -76,6 +76,9 @@ public void DoWork()
 
     //Get a single entity. Pass in whatever type the PK is.
     var singleUser = _repository.GetSingle<User>(1);
+    
+    //Or
+    singleUser = _repository.UserGroup.GetSingle(1);
 
     //Delete
     _repository.Delete(singleUser);
@@ -97,6 +100,9 @@ public void DoWork()
     }
     _repository.SaveChanges();
     _repository.SetDeffered(false);
+    
+    //Finally we can call special functions from the groups as expected
+    _repository.UserGroup.GetUsersBySpecialMagic("Magic");
 }
 ```
 
