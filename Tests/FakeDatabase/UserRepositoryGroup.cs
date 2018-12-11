@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Tests.FakeEntities;
 
-namespace Tests.RepoTests
+namespace Tests.FakeDatabase
 {
     public class UserRepositoryGroup : RepositoryGroup<User>
     {

@@ -2,9 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Tests.FakeDatabase;
 
-namespace Tests.RepoTests
+namespace Tests.FakeDatabase
 {
     public class FakeRepo : BaseDbRepository<TestDbContext>
     {
