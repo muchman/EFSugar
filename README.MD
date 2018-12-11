@@ -173,6 +173,13 @@ private IMyAppRepo _repository {get; set;}
 public void FilterStuff()
 {
     var filter = new OrderFilter() { NestedOrderTypeId = 1, UId = 1 };
+    
+    //Let's set the orderby
+    filter.SetOrderBy(of => of.UId, OrderByDirection.Descending);
+    
+    //Or like this
+    filter.OrderByDirection = OrderByDirection.Descending;
+    filter.OrderByPropertyName = "Id";
 
     //we will get back a FilteredResult which has a Value that in this case is IEnumerable of
     //Orders that have UserId == 1 and OrderType.Id == 1.  It will also have a 
