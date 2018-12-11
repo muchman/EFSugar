@@ -179,7 +179,7 @@ public void FilterStuff()
     
     //Or like this
     filter.OrderByDirection = OrderByDirection.Descending;
-    filter.OrderByPropertyName = "Id";
+    filter.OrderByPropertyName = "UId";
 
     //we will get back a FilteredResult which has a Value that in this case is IEnumerable of
     //Orders that have UserId == 1 and OrderType.Id == 1.  It will also have a 
