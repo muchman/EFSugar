@@ -203,6 +203,13 @@ public void FilterStuff()
 
 ## Release History
 
+* 1.1.0
+    * Changed namespace to be EFCoreSugar since that makes more sense given the package name and altered the folder structure
+    * Made FilteredQuery not have a RecordCount so you can compose filters/queries together.  RecordCount now only appears after you .Resolve() a FilteredQuery.
+    * Added lots of caching for properties so we only need to reflect once per type
+    * Added a GlobalEFCoreSugar class to aid in startup type of behavior (caching)
+    * Revamped the behavior for loading RepositoryGroups and BaseDbRepositories to support abstracted interface types.
+    * Made the direction in SetOrderBy() be optional, ascending is the default
 * 1.0.1
     * Exposed the FilterIgnore attribute
 * 1.0.0

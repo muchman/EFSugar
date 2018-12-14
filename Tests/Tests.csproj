@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EFSugar\EFSugar.csproj" />
+    <ProjectReference Include="..\src\EFCoreSugar.csproj" />
   </ItemGroup>
 
 </Project>
