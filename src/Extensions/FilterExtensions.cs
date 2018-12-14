@@ -45,6 +45,13 @@ namespace EFCoreSugar.Filters
             return query.Filter(filter);
         }
 
+        public static FilteredQuery<T> Filter<T>(this FilteredQuery<T> query, Filter filter) where T : class
+        {
+            //we will preserve the first filter paging settings always
+            query.Query = query.Query.Filter(filter).Query;
+            return query;
+        }
+
         public static FilteredResult<T> Filter<T>(this IBaseDbRepository repository, Filter filter) where T : class
         {
             return repository.DBContext.Filter<T>(filter).Resolve();
