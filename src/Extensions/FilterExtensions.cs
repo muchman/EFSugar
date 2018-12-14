@@ -52,16 +52,17 @@ namespace EFCoreSugar.Filters
             var newFilteredQuery = filter.ApplyFilter(baseQuery.Query);
             baseQuery.Query = newFilteredQuery.Query;
 
-            if(baseQuery.OrderBys.Count == 0)
+            if (baseQuery.OrderByProperties.Count == 0)
             {
-                baseQuery.OrderBys.Add(baseQuery.ParentFilter._OrderByFilter);
-                baseQuery.OrderByProperties.Add(baseQuery.ParentFilter._OrderByFilter.PropertyName ?? EFCoreSugarPropertyCollection.GetDefaultPropertyName(typeof(T)));
+                baseQuery.OrderByProperties.Add(baseQuery.OrderBys.First().PropertyName ?? EFCoreSugarPropertyCollection.GetDefaultPropertyName(typeof(T)));
             }
 
-            if(newFilteredQuery.ParentFilter._OrderByFilter.PropertyName != null && !baseQuery.OrderByProperties.Contains(newFilteredQuery.ParentFilter._OrderByFilter.PropertyName))
+            //we want to ignore additional orderbys if they are not set explicitly, this likely means they are doing something else and dont care about the order by
+            var newOrderBy = newFilteredQuery.OrderBys.First();
+            if (newOrderBy.PropertyName != null && !baseQuery.OrderByProperties.Contains(newOrderBy.PropertyName))
             {
-                baseQuery.OrderBys.Add(newFilteredQuery.ParentFilter._OrderByFilter);
-                baseQuery.OrderByProperties.Add(newFilteredQuery.ParentFilter._OrderByFilter.PropertyName);
+                baseQuery.OrderBys.Add(newOrderBy);
+                baseQuery.OrderByProperties.Add(newOrderBy.PropertyName);
             }
             return baseQuery;
         }

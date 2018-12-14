@@ -9,25 +9,21 @@ namespace EFCoreSugar.Filters
     public class FilteredQuery<T> where T : class
     {
         public IQueryable<T> Query { get; set; }
-        internal Filter ParentFilter { get; }
+        private PagingFilter PagingFilter { get; }
         internal HashSet<string> OrderByProperties { get; } = new HashSet<string>();
         internal List<OrderByFilter> OrderBys { get; } = new List<OrderByFilter>();
 
-        internal FilteredQuery(IQueryable<T> query, Filter parent)
+        internal FilteredQuery(IQueryable<T> query, PagingFilter pagingFilter, OrderByFilter orderByFilter)
         {
             Query = query;
-            ParentFilter = parent;
+            PagingFilter = pagingFilter;
+            OrderBys.Add(orderByFilter);
         }
 
         public FilteredResult<T> Resolve()
         {
             var result = Query.Expression;
             var nested = false;
-
-            if(OrderBys.Count == 0)
-            {
-                OrderBys.Add(ParentFilter._OrderByFilter);
-            }
 
             foreach (var orderByFilter in OrderBys)
             {
@@ -41,7 +37,7 @@ namespace EFCoreSugar.Filters
             }
 
             Query = Query.Provider.CreateQuery<T>(result);
-            var pagingResult = ParentFilter._PagingFilter.ApplyFilter(Query);
+            var pagingResult = PagingFilter.ApplyFilter(Query);
             return new FilteredResult<T>() { RecordCount = pagingResult.RecordCount, Value = pagingResult.Query.ToList() };
         }
 
