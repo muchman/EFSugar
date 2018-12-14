@@ -1,5 +1,6 @@
 ﻿using EFCoreSugar.Global;
 using EFCoreSugar.Repository;
+using EFCoreSugar.Repository.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ namespace EFCoreSugar
     {
         public static IServiceCollection RegisterRepositoryGroups(this IServiceCollection collection)
         {
-            return RegisterType(collection, typeof(IRepositoryGroup));
+            return RegisterType(collection, typeof(IBaseRepositoryGroup));
         }
 
         public static IServiceCollection RegisterBaseRepositories(this IServiceCollection collection)
@@ -21,13 +22,18 @@ namespace EFCoreSugar
             return RegisterType(collection, typeof(IBaseDbRepository));
         }
 
-        private static IServiceCollection RegisterType(IServiceCollection collection, Type interfaceType)
+        private static IServiceCollection RegisterType(IServiceCollection collection, Type baseType)
         {
-            var types = EFCoreSugarGlobal.GetAllTypesInAssemblies(interfaceType);
+            var types = EFCoreSugarGlobal.GetAllTypesInAssemblies(baseType);
 
             foreach (var type in types)
             {
                 collection.AddTransient(type);
+                var interfaceType = type.GetInterface($"I{type.Name}", true);
+                if (interfaceType != null)
+                {
+                    collection.AddTransient(interfaceType, type);
+                }
             }
             return collection;
         }

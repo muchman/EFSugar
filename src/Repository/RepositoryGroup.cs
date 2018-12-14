@@ -6,7 +6,7 @@ using System.Text;
 
 namespace EFCoreSugar.Repository
 {
-    public abstract class RepositoryGroup<TEntity> : IRepositoryGroup where TEntity : class
+    public abstract class RepositoryGroup<TEntity> : IRepositoryGroup<TEntity> where TEntity : class
     {
         public IBaseDbRepository ParentBaseRepository { get; set; }
 

@@ -25,7 +25,6 @@ namespace Tests.FilterTestGoup
             //should be 3
             var orders = repo.Filter<Order>(filter);
             orders.RecordCount.Should().Be(3);
-
         }
 
         [Fact]
@@ -91,6 +90,12 @@ namespace Tests.FilterTestGoup
             orders = repo.Filter<Order>(filter);
             orders.Value.First().Id.Should().Be(28);
 
+        }
+
+        [Fact]
+        public void GlobalLoaderTest()
+        {
+            EFCoreSugarGlobal.BuildFilters();
         }
     }
 }

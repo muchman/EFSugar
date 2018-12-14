@@ -23,9 +23,10 @@ namespace Tests
 
         private IServiceCollection RegisterServices(IServiceCollection services)
         {
-            services.AddTransient<FakeRepo>();
+            services.RegisterBaseRepositories();
+            services.RegisterRepositoryGroups();
             services.AddScoped<TestDbContext>();
-            return services.RegisterRepositoryGroups();
+            return services;
         }
 
         protected virtual void SeedData()

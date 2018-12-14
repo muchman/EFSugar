@@ -8,7 +8,7 @@ using EFCoreSugar.Global;
 
 namespace EFCoreSugar.Filters
 {
-    public class Filter
+    public abstract class Filter
     {
         private OrderByFilter _OrderByFilter = new OrderByFilter();
         private PagingFilter _PagingFilter = new PagingFilter();

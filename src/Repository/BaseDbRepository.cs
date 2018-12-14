@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EFCoreSugar.Global;
+using EFCoreSugar.Repository.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,24 +8,24 @@ using System.Reflection;
 
 namespace EFCoreSugar.Repository
 {
-    public class BaseDbRepository<T> : IBaseDbRepository where T : DbContext
+    public abstract class BaseDbRepository<T> : IBaseDbRepository where T : DbContext
     {
         public DbContext DBContext { get; }
-        private static IEnumerable<PropertyInfo> PropertyInfoCollection { get; set; }
         private bool _deferred;
 
         public BaseDbRepository(T context, IServiceProvider serviceProvider)
         {
             DBContext = context;
+            var thisType = this.GetType();
 
-            if(PropertyInfoCollection == null)
+            if (!EFCoreSugarPropertyCollection.BaseDbRepositoryGroupTypeProperties.TryGetValue(thisType, out var props))
             {
-                PropertyInfoCollection = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(pi => typeof(IRepositoryGroup).IsAssignableFrom(pi.PropertyType));
+                props = EFCoreSugarPropertyCollection.RegisterBaseDbRepositoryGroupProperties(thisType);
             }
             
-            foreach (var prop in PropertyInfoCollection)
+            foreach (var prop in props)
             {
-                var group = serviceProvider.GetService(prop.PropertyType) as IRepositoryGroup;
+                var group = serviceProvider.GetService(prop.PropertyType) as IBaseRepositoryGroup;
                 group.ParentBaseRepository = this;
                 prop.SetValue(this, group);
             }

@@ -1,5 +1,8 @@
 ﻿using EFCoreSugar.Filters;
+using EFCoreSugar.Repository;
+using EFCoreSugar.Repository.Interfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -11,9 +14,19 @@ namespace EFCoreSugar.Global
     internal static class EFCoreSugarPropertyCollection
     {
         private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
-        internal static Dictionary<Type, IEnumerable<FilterProperty>> FilterTypeProperties { get; } = new Dictionary<Type, IEnumerable<FilterProperty>>();
 
-        internal static Dictionary<Type, OrderByProperties> OrderByTypeProperties { get; } = new Dictionary<Type, OrderByProperties>();
+        internal static ConcurrentDictionary<Type, IEnumerable<FilterProperty>> FilterTypeProperties { get; } = new ConcurrentDictionary<Type, IEnumerable<FilterProperty>>();
+        internal static ConcurrentDictionary<Type, IEnumerable<PropertyInfo>> BaseDbRepositoryGroupTypeProperties { get; } = new ConcurrentDictionary<Type, IEnumerable<PropertyInfo>>();
+        internal static ConcurrentDictionary<Type, OrderByProperties> OrderByTypeProperties { get; } = new ConcurrentDictionary<Type, OrderByProperties>();
+
+        internal static IEnumerable<PropertyInfo> RegisterBaseDbRepositoryGroupProperties(Type type)
+        {
+            var props = type.GetProperties(_BindingFlags).Where(pi => typeof(IBaseRepositoryGroup).IsAssignableFrom(pi.PropertyType));
+
+            BaseDbRepositoryGroupTypeProperties.AddOrUpdate(type, props, (key, old) => props);
+
+            return props;
+        }
 
         internal static IEnumerable<FilterProperty> RegisterFilterProperties(Type type)
         {
@@ -25,17 +38,11 @@ namespace EFCoreSugar.Global
                 propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>()));
             }
 
-            if (!FilterTypeProperties.ContainsKey(type))
-            {
-                FilterTypeProperties.Add(type, propsList);
-            }
-            else
-            {
-                FilterTypeProperties[type] = propsList;
-            }
+            FilterTypeProperties.AddOrUpdate(type, propsList, (key, old) => propsList);
 
             return propsList;
         }
+
 
         internal static OrderByProperties RegisterOrderByProperties(Type type)
         {
