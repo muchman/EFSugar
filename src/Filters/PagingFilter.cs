@@ -10,21 +10,19 @@ namespace EFCoreSugar.Filters
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
 
-        public FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
+        public (IQueryable<T> Query, int RecordCount) ApplyFilter<T>(IQueryable<T> query) where T : class
         {
-            var result = new FilteredQuery<T>();
-            result.RecordCount = query.Count();
+            var count = query.Count();
 
             //this really only works if you have a pagesize, otherwise how many do you skip or take?
             if (PageSize > 0)
             {
-                result.Query = query.Skip((PageNumber > 0 ? PageNumber - 1 : 0) * PageSize).Take(PageSize);
+                return (query.Skip((PageNumber > 0 ? PageNumber - 1 : 0) * PageSize).Take(PageSize), count);
             }
             else
             {
-                result.Query = query;
+                return (query, count);
             }
-            return result;
         }
     }
 }

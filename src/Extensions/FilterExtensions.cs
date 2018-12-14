@@ -22,7 +22,7 @@ namespace EFCoreSugar.Filters
             var unaryExpression = (UnaryExpression)expression.Body;
             var memberExpression = ((MemberExpression)unaryExpression.Operand);
 
-            var filterProperty = memberExpression.Member.GetCustomAttribute<FilterProperty>();
+            var filterProperty = memberExpression.Member.GetCustomAttribute<FilterPropertyAttribute>();
 
             if (filterProperty != null && !String.IsNullOrWhiteSpace(filterProperty.PropertyName))
             {

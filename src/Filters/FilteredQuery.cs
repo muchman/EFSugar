@@ -5,14 +5,22 @@ using System.Text;
 
 namespace EFCoreSugar.Filters
 {
-    public class FilteredQuery<T>
+    public class FilteredQuery<T> where T : class
     {
         public IQueryable<T> Query { get; set; }
-        public int RecordCount { get; set; }
+        private PagingFilter PageFilter { get; }
+
+        internal FilteredQuery(IQueryable<T> query, PagingFilter pageFilter)
+        {
+            Query = query;
+            PageFilter = pageFilter;
+        }
 
         public FilteredResult<T> Resolve()
         {
-            return new FilteredResult<T>() { RecordCount = RecordCount, Value = Query.ToList() };
+            var pagingResult = PageFilter.ApplyFilter(Query);
+            return new FilteredResult<T>() { RecordCount = pagingResult.RecordCount, Value = pagingResult.Query.ToList() };
         }
+
     }
 }

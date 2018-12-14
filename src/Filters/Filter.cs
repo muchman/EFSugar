@@ -4,12 +4,12 @@ using System.Text;
 using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
+using EFCoreSugar.Global;
 
 namespace EFCoreSugar.Filters
 {
     public class Filter
     {
-        private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
         private OrderByFilter _OrderByFilter = new OrderByFilter();
         private PagingFilter _PagingFilter = new PagingFilter();
 
@@ -35,29 +35,24 @@ namespace EFCoreSugar.Filters
         [FilterIgnore]
         public int PageNumber { get { return _PagingFilter.PageNumber; } set { _PagingFilter.PageNumber = value; } }
 
+
         public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
+            var thisType = this.GetType();
+            PropertyCollection.TypeProperties.TryGetValue(thisType, out var filterProps);
+            if(filterProps == null)
+            {
+                filterProps = PropertyCollection.RegisterFilterProperties(thisType);
+            }
             ParameterExpression entityParam = Expression.Parameter(typeof(T));
-            var expressionGroups = new Dictionary<int, Expression<Func<T, bool>>>();
-            var entityType = typeof(T);
-
             Expression<Func<T, bool>> predicate = null;
 
-            foreach (var prop in this.GetType().GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(FilterIgnoreAttribute))))
+            foreach (var filterProp in filterProps)
             {
-                var propValue = prop.GetValue(this);
+                var propValue = filterProp.Property.GetValue(this);
                 if (propValue != null)
                 {
-                    //get the filterproperty
-                    var filterAttr = prop.GetCustomAttribute<FilterProperty>() ?? default(FilterProperty);
-
-                    var propName = prop.Name;
-                    //see which name to use
-                    if (!String.IsNullOrWhiteSpace(filterAttr?.PropertyName))
-                    {
-                        propName = filterAttr.PropertyName;
-
-                    }
+                    var propName = filterProp.Attribute?.PropertyName ?? filterProp.Property.Name;
 
                     //build the predicate.  We walk the string split incase we have a nested property, this way also negates the need to
                     //find the propertyinfo for this thing.  Its less safe but will be much faster
@@ -69,18 +64,17 @@ namespace EFCoreSugar.Filters
                     var right = Expression.Constant(propValue);
 
                     var subPredicate = Expression.Lambda<Func<T, bool>>(
-                    FilterTestMap[filterAttr?.Test ?? FilterTest.Equal](left, right),
+                    FilterTestMap[filterProp.Attribute?.Test ?? FilterTest.Equal](left, right),
                     new[] { entityParam });
 
                     predicate = predicate != null ? predicate.And(subPredicate) : subPredicate;
-
                 }
             }
 
             query = query.Where(predicate);
             query = _OrderByFilter.ApplyFilter(query);
 
-            return _PagingFilter.ApplyFilter(query);
+            return new FilteredQuery<T>(query, _PagingFilter);
         }
     }
 }

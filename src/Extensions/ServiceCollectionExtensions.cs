@@ -1,4 +1,5 @@
-﻿using EFCoreSugar.Repository;
+﻿using EFCoreSugar.Global;
+using EFCoreSugar.Repository;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -22,16 +23,7 @@ namespace EFCoreSugar
 
         private static IServiceCollection RegisterType(IServiceCollection collection, Type interfaceType)
         {
-            var domain = AppDomain.CurrentDomain;
-
-            var assemblies = domain.GetAssemblies();
-
-            List<Type> types = new List<Type>();
-
-            foreach (var assembly in assemblies)
-            {
-                types.AddRange(assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && interfaceType.IsAssignableFrom(t)));
-            }
+            var types = EFCoreSugarGlobal.GetAllTypesInAssemblies(interfaceType);
 
             foreach (var type in types)
             {
