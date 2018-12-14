@@ -1,4 +1,5 @@
-﻿using EFCoreSugar.Repository;
+﻿using EFCoreSugar.Global;
+using EFCoreSugar.Repository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -45,33 +46,29 @@ namespace EFCoreSugar.Filters
             return query.Filter(filter);
         }
 
-        public static FilteredQuery<T> Filter<T>(this FilteredQuery<T> query, Filter filter) where T : class
+        public static FilteredQuery<T> Filter<T>(this FilteredQuery<T> baseQuery, Filter filter) where T : class
         {
             //we will preserve the first filter paging settings always
-            query.Query = query.Query.Filter(filter).Query;
-            return query;
+            var newFilteredQuery = filter.ApplyFilter(baseQuery.Query);
+            baseQuery.Query = newFilteredQuery.Query;
+
+            if(baseQuery.OrderBys.Count == 0)
+            {
+                baseQuery.OrderBys.Add(baseQuery.ParentFilter._OrderByFilter);
+                baseQuery.OrderByProperties.Add(baseQuery.ParentFilter._OrderByFilter.PropertyName ?? EFCoreSugarPropertyCollection.GetDefaultPropertyName(typeof(T)));
+            }
+
+            if(newFilteredQuery.ParentFilter._OrderByFilter.PropertyName != null && !baseQuery.OrderByProperties.Contains(newFilteredQuery.ParentFilter._OrderByFilter.PropertyName))
+            {
+                baseQuery.OrderBys.Add(newFilteredQuery.ParentFilter._OrderByFilter);
+                baseQuery.OrderByProperties.Add(newFilteredQuery.ParentFilter._OrderByFilter.PropertyName);
+            }
+            return baseQuery;
         }
 
         public static FilteredResult<T> Filter<T>(this IBaseDbRepository repository, Filter filter) where T : class
         {
             return repository.DBContext.Filter<T>(filter).Resolve();
-        }
-
-        internal static PropertyInfo WalkToPropByName(this Type type, string name, BindingFlags flags)
-        {
-            PropertyInfo currentProp = null;
-            foreach (string part in name.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
-            {
-                if(currentProp != null)
-                {
-                    currentProp = currentProp.PropertyType.GetProperty(part, flags);
-                }
-                else
-                {
-                    currentProp = type.GetProperty(part, flags);
-                }               
-            }
-            return currentProp;
         }
     }
 }

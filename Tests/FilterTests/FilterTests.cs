@@ -93,6 +93,26 @@ namespace Tests.FilterTestGoup
         }
 
         [Fact]
+        public void FilterComposeTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            SeedData();
+
+            var filter1 = new OrderFilter() { OrderTypeId = 1, PageNumber = 1, PageSize = 1 };
+            var filter2 = new OrderFilter() { PName = "Shoes", PageNumber = 1, PageSize = 5 };//paging should be ignored, we only allow the first filter to decide paging for now
+            filter1.SetOrderBy(x => x.UId, OrderByDirection.Descending); //descending
+
+            var orders = repo.GetQueryable<Order>();
+            var firstquery = orders.Filter(filter1);
+            var secondquery = firstquery.Filter(filter2);
+            var actualorders = secondquery.Resolve();
+
+            actualorders.RecordCount.Should().Be(15); //15 pre-paged
+            actualorders.Value.Count().Should().Be(1);
+            actualorders.Value.First().UserId.Should().Be(10);
+        }
+
+        [Fact]
         public void GlobalLoaderTest()
         {
             EFCoreSugarGlobal.BuildFilters();

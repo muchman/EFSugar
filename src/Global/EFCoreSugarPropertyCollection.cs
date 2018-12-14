@@ -17,7 +17,7 @@ namespace EFCoreSugar.Global
 
         internal static ConcurrentDictionary<Type, IEnumerable<FilterProperty>> FilterTypeProperties { get; } = new ConcurrentDictionary<Type, IEnumerable<FilterProperty>>();
         internal static ConcurrentDictionary<Type, IEnumerable<PropertyInfo>> BaseDbRepositoryGroupTypeProperties { get; } = new ConcurrentDictionary<Type, IEnumerable<PropertyInfo>>();
-        internal static ConcurrentDictionary<Type, OrderByProperties> OrderByTypeProperties { get; } = new ConcurrentDictionary<Type, OrderByProperties>();
+        internal static ConcurrentDictionary<Type, string> DefaultOrderByTypeProperties { get; } = new ConcurrentDictionary<Type, string>();
 
         internal static IEnumerable<PropertyInfo> RegisterBaseDbRepositoryGroupProperties(Type type)
         {
@@ -44,23 +44,33 @@ namespace EFCoreSugar.Global
         }
 
 
-        internal static OrderByProperties RegisterOrderByProperties(Type type)
+        internal static string RegisterDefaultOrderByProperty(Type type)
         {
-            var orderByProperties = new OrderByProperties();
+            string defaultName = null;
             var props = type.GetProperties();
 
             foreach(var prop in props)
             {
-                orderByProperties.Properties.Add(prop.Name, prop);
                 if(Attribute.IsDefined(prop, typeof(KeyAttribute)) || prop.Name.Equals("id", StringComparison.OrdinalIgnoreCase))
                 {
-                    orderByProperties.DefaultOrderBy = prop;
+                    defaultName = prop.Name;
                 }
             }
 
-            orderByProperties.DefaultOrderBy = orderByProperties.DefaultOrderBy ?? props.First();
+            defaultName = defaultName ?? props.First().Name;
+            DefaultOrderByTypeProperties.AddOrUpdate(type, defaultName, (key, old) => defaultName);
 
-            return orderByProperties;
+            return defaultName;
+        }
+
+        internal static string GetDefaultPropertyName(Type type)
+        {
+            if (!DefaultOrderByTypeProperties.TryGetValue(type, out var defaultPropName))
+            {
+                defaultPropName = RegisterDefaultOrderByProperty(type);
+            }
+
+            return defaultPropName;
         }
     }
 }

@@ -10,8 +10,8 @@ namespace EFCoreSugar.Filters
 {
     public abstract class Filter
     {
-        private OrderByFilter _OrderByFilter = new OrderByFilter();
-        private PagingFilter _PagingFilter = new PagingFilter();
+        internal OrderByFilter _OrderByFilter = new OrderByFilter();
+        internal PagingFilter _PagingFilter = new PagingFilter();
 
         //TODO: rework how this is handled, I didnt want people to import the expression stuff just to define the type of comparar they wanted
         private static Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>> FilterTestMap =
@@ -77,9 +77,8 @@ namespace EFCoreSugar.Filters
             }
 
             query = query.Where(predicate);
-            query = _OrderByFilter.ApplyFilter(query);
 
-            return new FilteredQuery<T>(query, _PagingFilter);
+            return new FilteredQuery<T>(query, this);
         }
     }
 }
