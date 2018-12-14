@@ -1,4 +1,4 @@
-﻿using EFSugar.Repository;
+﻿using EFCoreSugar.Repository;
 using System;
 using System.Collections.Generic;
 using System.Text;

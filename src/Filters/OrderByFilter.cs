@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace EFSugar.Filters
+namespace EFCoreSugar.Filters
 {
     public class OrderByFilter
     {

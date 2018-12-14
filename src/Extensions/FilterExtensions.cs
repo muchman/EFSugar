@@ -1,4 +1,4 @@
-﻿using EFSugar.Repository;
+﻿using EFCoreSugar.Repository;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace EFSugar.Filters
+namespace EFCoreSugar.Filters
 {
 
     //I need a way to self reference the filter.  I cant say this T inside of the filter and I cant expose the properties another way that I know of

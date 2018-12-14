@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EFSugar.Filters
+namespace EFCoreSugar.Filters
 {
     public enum FilterTest
     {

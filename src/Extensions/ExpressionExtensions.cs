@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace EFSugar.Filters
+namespace EFCoreSugar.Filters
 {
     /* Note: Yes I have commented code here, it will be removed soon!
 

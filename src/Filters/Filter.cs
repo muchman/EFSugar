@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace EFSugar.Filters
+namespace EFCoreSugar.Filters
 {
     public class Filter
     {

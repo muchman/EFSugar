@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace EFSugar.Repository
+namespace EFCoreSugar.Repository
 {
     public interface IBaseDbRepository
     {

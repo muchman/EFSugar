@@ -1,4 +1,4 @@
-﻿using EFSugar.Repository;
+﻿using EFCoreSugar.Repository;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace EFSugar
+namespace EFCoreSugar
 {
     public static class ServiceCollectionExtensions
     {

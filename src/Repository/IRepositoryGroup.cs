@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EFSugar.Repository
+namespace EFCoreSugar.Repository
 {
     public interface IRepositoryGroup
     {

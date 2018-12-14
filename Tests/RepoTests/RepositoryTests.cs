@@ -1,5 +1,5 @@
-﻿using EFSugar;
-using EFSugar.Filters;
+﻿using EFCoreSugar;
+using EFCoreSugar.Filters;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using System;

@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EFSugar.Filters
+namespace EFCoreSugar.Filters
 {
-    public enum FilterOperation
+    public class FilterIgnoreAttribute : Attribute
     {
-        And,
-        Or
     }
 }

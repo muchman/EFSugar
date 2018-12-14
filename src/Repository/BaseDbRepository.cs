@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace EFSugar.Repository
+namespace EFCoreSugar.Repository
 {
     public class BaseDbRepository<T> : IBaseDbRepository where T : DbContext
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace EFSugar
+namespace EFCoreSugar
 {
     public class DateRange
     {
