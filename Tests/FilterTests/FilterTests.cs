@@ -64,5 +64,33 @@ namespace Tests.FilterTestGoup
             orders.Value.Count().Should().Be(5);
             orders.Value.First().Id.Should().Be(7);
         }
+
+        [Fact]
+        public void OrderByTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            SeedData();
+
+            var filter = new OrderFilter() { OrderTypeId = 1};
+            filter.SetOrderBy(x => x.UId); //ascending
+
+            var orders = repo.Filter<Order>(filter);
+            orders.Value.First().UserId.Should().Be(1);
+
+            filter.SetOrderBy(x => x.UId, OrderByDirection.Descending); //descending
+
+            orders = repo.Filter<Order>(filter);
+            orders.Value.First().UserId.Should().Be(10);
+
+            //default field will be Id since its called Id, but also has a key value
+            filter = new OrderFilter() { OrderTypeId = 1 };
+            orders = repo.Filter<Order>(filter);
+            orders.Value.First().Id.Should().Be(1);
+
+            filter.OrderByDirection = OrderByDirection.Descending;
+            orders = repo.Filter<Order>(filter);
+            orders.Value.First().Id.Should().Be(28);
+
+        }
     }
 }

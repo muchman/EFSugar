@@ -14,7 +14,7 @@ namespace EFCoreSugar
             var types = GetAllTypesInAssemblies(typeof(Filter));
             foreach (var type in types)
             {
-                PropertyCollection.RegisterFilterProperties(type);
+                EFCoreSugarPropertyCollection.RegisterFilterProperties(type);
                 //TODO: prebuild some of the expressions here also?
             }
         }

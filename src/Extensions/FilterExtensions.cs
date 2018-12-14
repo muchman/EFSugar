@@ -15,7 +15,7 @@ namespace EFCoreSugar.Filters
     public static class FilterExtensions
     {
 
-        public static void SetOrderBy<T>(this T filter, Expression<Func<T, object>> expression, OrderByDirection direction) where T : Filter
+        public static void SetOrderBy<T>(this T filter, Expression<Func<T, object>> expression, OrderByDirection direction = OrderByDirection.Ascending) where T : Filter
         {
             filter.OrderByDirection = direction;
 

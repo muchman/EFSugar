@@ -39,15 +39,15 @@ namespace EFCoreSugar.Filters
         public Filter()
         {
             ThisType = this.GetType();
-            if (!PropertyCollection.TypeProperties.ContainsKey(ThisType))
+            if (!EFCoreSugarPropertyCollection.FilterTypeProperties.ContainsKey(ThisType))
             {
-                PropertyCollection.RegisterFilterProperties(ThisType);
+                EFCoreSugarPropertyCollection.RegisterFilterProperties(ThisType);
             }
         }
         public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
             //it should be here since we register it in the constructor, or in the Global BuildFilters call
-            PropertyCollection.TypeProperties.TryGetValue(ThisType, out var filterProps);
+            EFCoreSugarPropertyCollection.FilterTypeProperties.TryGetValue(ThisType, out var filterProps);
 
             ParameterExpression entityParam = Expression.Parameter(typeof(T));
             Expression<Func<T, bool>> predicate = null;

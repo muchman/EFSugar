@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFCoreSugar.Global;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -18,16 +19,18 @@ namespace EFCoreSugar.Filters
             PropertyInfo prop = null;
             var type = typeof(T);
 
-            if(String.IsNullOrWhiteSpace(PropertyName))
+            if(!EFCoreSugarPropertyCollection.OrderByTypeProperties.TryGetValue(type, out var props))
             {
-                var props = type.GetProperties();
-                prop = props.First(p => p.Name.ToLower() == "id" || Attribute.IsDefined(p, typeof(KeyAttribute))) ?? props.First();
+                props = EFCoreSugarPropertyCollection.RegisterOrderByProperties(type);
+            }
+
+            if(string.IsNullOrWhiteSpace(PropertyName))
+            {
+                prop = props.DefaultOrderBy;
             }
             else
             {
-                prop = type.GetProperty(PropertyName, _BindingFlags);
-
-                if(prop == null)
+                if(!props.Properties.TryGetValue(PropertyName, out prop))
                 {
                     throw new Exception($"Property with name {PropertyName} does not exist in {typeof(T).Name}");
                 }
