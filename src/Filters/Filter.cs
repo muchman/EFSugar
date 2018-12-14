@@ -34,16 +34,21 @@ namespace EFCoreSugar.Filters
         public int PageSize { get { return _PagingFilter.PageSize; } set { _PagingFilter.PageSize = value; } }
         [FilterIgnore]
         public int PageNumber { get { return _PagingFilter.PageNumber; } set { _PagingFilter.PageNumber = value; } }
+        private Type ThisType { get; }
 
-
+        public Filter()
+        {
+            ThisType = this.GetType();
+            if (!PropertyCollection.TypeProperties.ContainsKey(ThisType))
+            {
+                PropertyCollection.RegisterFilterProperties(ThisType);
+            }
+        }
         public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
-            var thisType = this.GetType();
-            PropertyCollection.TypeProperties.TryGetValue(thisType, out var filterProps);
-            if(filterProps == null)
-            {
-                filterProps = PropertyCollection.RegisterFilterProperties(thisType);
-            }
+            //it should be here since we register it in the constructor, or in the Global BuildFilters call
+            PropertyCollection.TypeProperties.TryGetValue(ThisType, out var filterProps);
+
             ParameterExpression entityParam = Expression.Parameter(typeof(T));
             Expression<Func<T, bool>> predicate = null;
 
