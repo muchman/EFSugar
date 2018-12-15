@@ -32,6 +32,9 @@ dotnet add package EFCoreSugar
 
 Repositories should all inherit from BaseDbRepository\<Your DbContext> and it's interface, if you chose to have one, should inherit from IBaseDbRepository to ensure functionality works with injection patterns.  A special note is that all repo groups will share the same DbContext as the main repo they are contained in.  This is Intentional to leverage caching in the DbContext across all the groups.  It is called DBContext inside the BaseDbRepository and its DbSets can be accessed with Set\<T>() in the RepositoryGroup.
 
+Rules:
+1. If you want the service extension methods to work with interface types because you want to interface your repository and groups then the interface name *MUST* match the implementation name preceded with an "I".  Example - MyAppRepo : IMyAppRepo
+
 An example repository with its groupings may look like this:
 
 ```C#
@@ -55,12 +58,22 @@ public class UserRepositoryGroup : RepositoryGroup<User>
         query.Where(u => u.Magic == magicStuff).Tolist().First();
     }
 }
+```
 
+If you really want to follow more Rigid SOLID principals and interface all the things and keep interface and implementation seperate for a repository then you have some more setup to do.
+See rule 1.
+
+```C#
 //Our interface
 public interface IMyAppRepo : IBaseDbRepository
 {
     //we need to expose this access if we are injecting based on the interface
-    UserRepositoryGroup UserGroup {get; set;}
+    IUserRepositoryGroup UserGroup {get; set;}
+}
+
+public interface IUserRepositoryGroup : IRepositoryGroup<User>
+{
+    User GetUsersBySpecialMagic(string magicStuff)
 }
 ```
 
@@ -123,14 +136,27 @@ public void ConfigureServices(IServiceCollection services)
 
 ### **Filters**
 
-Filters allow dynamically building where clauses based on which properties are set.  For now there are a few important rules to know about filters and how they work.
+Filters allow dynamically building where clauses based on which properties are set.  Filters do not know about what entity they are filtering ahead of time.  This means API's do not need to import entities directly to build a structure that would like like Filter\<User>.  Instead filters can be re-used for other entities if the properties are the same.  For example if all your entities have a property that is int Id, you can have create an IdFilter that can be applied to all DbSets.  For now there are a few important rules to know about filters and how they work.
 
 1. Properties in a filter MUST be nullable (example: int?, Guid?, DateTime?, string) as this is how we determine if a property is set or not.  This eliminates the problem of int defaulting to zero, but maybe you are actually trying to query where ID == 0.
 2. Properties structure should be flat.  Adding nested user defined objects with their own properties is needlessly complex and will not resolve anything useful.
-3. If you do not specify an OrderBy using the OrderByPropertyName or an extension on the filter object to SetOrderBy it will try to use a property with [Key] attribute, a property named "Id", or simply the first one that is set in the filter properties.
+3. If you do not specify an OrderBy using the OrderByPropertyName or an extension on the filter object to SetOrderBy it will try to use a property with [Key] attribute, a property named "Id", or simply the first property in the entity.
+   * Composed Filters by means of filtering a FilteredQuery will try this default OrderBy behavior on the *FIRST* filter and it will ignore other orderbys *UNLESS* you specify the OrderByPropertyName *AND* it is not already in a previous OrderBy.
+4. Composed filters will use the paging of the first filter and will ignore all other paging from other filters so set it there.
+5. The ordering and paging are applied when a FilteredQuery is .Resolved().  If you access the query from the FilteredQuery and resolve it manually with a ToList() it will not be paged or ordered.  *In the future this behavior may change so avoid accessing the query directly unless you have to or append to the query and resolve its FilteredQuery parent.*
+
+Setup:
+
+```C#
+//In ConfigureServices in the Startup.Cs or wherever you would put startup logic
+public void ConfigureServices(IServiceCollection services)
+{
+    //v1.1.0+ has a optimization loader
+    EFCoreSugarGlobal.BuildFilters();
+}
+```
 
 Usage:
-
 ```C#
     //our filter inherits from Filter
     public class OrderFilter : Filter
@@ -181,6 +207,10 @@ public void FilterStuff()
     filter.OrderByDirection = OrderByDirection.Descending;
     filter.OrderByPropertyName = "UId";
 
+    //Paging, if you dont set these you get back all the results
+    filter.PageNumber = 1;
+    filter.PageSize = 100;
+
     //we will get back a FilteredResult which has a Value that in this case is IEnumerable of
     //Orders that have UserId == 1 and OrderType.Id == 1.  It will also have a 
     //RecordCount which is useful for paging
@@ -196,8 +226,36 @@ public void FilterStuff()
     //constructored query and a RecordCount of that result.  
     //You could modify the query further if you wish or you can Resolve it.
 
-    var ordersFromQuery = ordersQuery.Resolve();//now we have a FilteredResult
+    //now we have a FilteredResult
+    var ordersFromQuery = ordersQuery.Resolve();
+
+    //The pre-paged count
+    ordersFromQuery.RecordCount;
+    //The actual IEnumerable of things
+    orderFromQuery.Value;
 }
+```
+
+### **Filter Composition**
+Starting in v1.1.0 FilteredQuery objects can be composed together with other filters.  This is useful for operations where the UI will pass you an initial filter and you want to construct an additional filter in an API layer.  For example the UI will construct a filter for OrderId == 1 and the api will make another filter where UserId == 2.  You can compose them as follows:
+
+```C#
+        public List<Orders> GetOrders(OrderFilter filter)
+        {
+            var userFilter = new UserFilter() { UserId = 2};
+
+            //Repository is a BaseDbRepository
+            var orders = Repository.GetQueryable<Order>();
+
+            //this is still a FilteredQuery so it can still be modified
+            var filteredQuery = orders.Filter(filter).Filter(userFilter);
+
+            //or
+            filteredQuery = Repository.DBContext.Filter<Order>(filter).Filter(userFilter);
+
+            //this will apply the paging and orderby
+            var filteredResult = filteredQuery.Resolve();
+        }
 ```
 
 
