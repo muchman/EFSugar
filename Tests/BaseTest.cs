@@ -46,9 +46,9 @@ namespace Tests
 
             context.Add(new OrderType() { Id = 2, Name = "Return" });
 
-            context.Add(new Order() { Id = 1, UserId = 1, OrderTypeId = 1, ProductName = "Shoes", Value = 10 });
+            context.Add(new Order() { Id = 1, UserId = 1, OrderTypeId = 1, ProductName = "Shoes", Value = 100 });
             context.Add(new Order() { Id = 2, UserId = 1, OrderTypeId = 1, ProductName = "Coat", Value = 10 });
-            context.Add(new Order() { Id = 3, UserId = 2, OrderTypeId = 1, ProductName = "Coat", Value = 10 });
+            context.Add(new Order() { Id = 3, UserId = 2, OrderTypeId = 1, ProductName = "Coat", Value = 100 });
             context.Add(new Order() { Id = 4, UserId = 2, OrderTypeId = 2, ProductName = "Coat", Value = 10 });
             context.Add(new Order() { Id = 5, UserId = 2, OrderTypeId = 1, ProductName = "Shoes", Value = 10 });
             context.Add(new Order() { Id = 6, UserId = 3, OrderTypeId = 1, ProductName = "Shirt", Value = 10 });
@@ -65,9 +65,9 @@ namespace Tests
             context.Add(new Order() { Id = 17, UserId = 10, OrderTypeId = 1, ProductName = "Shirt", Value = 10 });
             context.Add(new Order() { Id = 18, UserId = 1, OrderTypeId = 1, ProductName = "Shoes", Value = 10 });
             context.Add(new Order() { Id = 19, UserId = 2, OrderTypeId = 1, ProductName = "Shoes", Value = 10 });
-            context.Add(new Order() { Id = 20, UserId = 5, OrderTypeId = 1, ProductName = "Shoes", Value = 10 });
+            context.Add(new Order() { Id = 20, UserId = 5, OrderTypeId = 1, ProductName = "Shoes", Value = 100 });
             context.Add(new Order() { Id = 21, UserId = 8, OrderTypeId = 1, ProductName = "Pants", Value = 10 });
-            context.Add(new Order() { Id = 22, UserId = 7, OrderTypeId = 1, ProductName = "Shoes", Value = 10 });
+            context.Add(new Order() { Id = 22, UserId = 7, OrderTypeId = 1, ProductName = "Shoes", Value = 100 });
             context.Add(new Order() { Id = 23, UserId = 7, OrderTypeId = 2, ProductName = "Shoes", Value = 10 });
             context.Add(new Order() { Id = 24, UserId = 9, OrderTypeId = 1, ProductName = "Pants", Value = 10 });
             context.Add(new Order() { Id = 25, UserId = 4, OrderTypeId = 1, ProductName = "Shoes", Value = 10 });

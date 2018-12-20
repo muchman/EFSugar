@@ -113,6 +113,31 @@ namespace Tests.FilterTestGoup
         }
 
         [Fact]
+        public void FilterComposeTestOrderBy()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+            context.Add(new Order() { Id = 1, UserId = 5, OrderTypeId = 1, ProductName = "B", Value = 100 });
+            context.Add(new Order() { Id = 2, UserId = 6, OrderTypeId = 1, ProductName = "B", Value = 100 });
+            context.Add(new Order() { Id = 3, UserId = 3, OrderTypeId = 1, ProductName = "C", Value = 100 });
+            context.Add(new Order() { Id = 4, UserId = 6, OrderTypeId = 1, ProductName = "A", Value = 100 });
+            context.Add(new Order() { Id = 5, UserId = 5, OrderTypeId = 1, ProductName = "A", Value = 100 });
+            context.Add(new Order() { Id = 6, UserId = 3, OrderTypeId = 1, ProductName = "A", Value = 100 });
+            context.SaveChanges();
+
+            var filter1 = new OrderFilter() { Value = 100, OrderByPropertyName = "UId"};
+            filter1.SetOrderBy(f => f.UId);
+
+            var filter2 = new OrderFilter() { OrderByPropertyName = "PName"};//paging should be ignored, we only allow the first filter to decide paging for now
+
+            var orders = repo.GetQueryable<Order>();
+            var firstquery = orders.Filter(filter1);
+            var secondquery = firstquery.Filter(filter2);
+            var actualorders = secondquery.Resolve();
+        }
+
+        [Fact]
         public void GlobalLoaderTest()
         {
             EFCoreSugarGlobal.BuildFilters();
