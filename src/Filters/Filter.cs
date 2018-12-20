@@ -84,14 +84,18 @@ namespace EFCoreSugar.Filters
             }
 
 
-            if (!string.IsNullOrWhiteSpace(OrderByPropertyName) && orderByFinalName != null)
+            if (!string.IsNullOrWhiteSpace(OrderByPropertyName))
             {
-                OrderByPropertyName = orderByFinalName;
+                if (orderByFinalName != null)
+                {
+                    OrderByPropertyName = orderByFinalName;
+                }
+                else
+                {
+                    throw new Exception($"Cannot find OrderByPropertName: {OrderByPropertyName} in filter of type: {ThisType}");
+                }
             }
-            else
-            {
-                throw new Exception($"Cannot find OrderByPropertName: {OrderByPropertyName} in filter of type: {ThisType}");
-            }
+
 
             predicate = predicate ?? Expression.Lambda<Func<T, bool>>(Expression.Constant(true), Expression.Parameter(type));
 

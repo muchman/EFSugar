@@ -23,16 +23,7 @@ namespace EFCoreSugar.Filters
             var unaryExpression = (UnaryExpression)expression.Body;
             var memberExpression = ((MemberExpression)unaryExpression.Operand);
 
-            var filterProperty = memberExpression.Member.GetCustomAttribute<FilterPropertyAttribute>();
-
-            if (filterProperty != null && !String.IsNullOrWhiteSpace(filterProperty.PropertyName))
-            {
-                filter.OrderByPropertyName = filterProperty.PropertyName;
-            }
-            else
-            {
-                filter.OrderByPropertyName = memberExpression.Member.Name;
-            }
+            filter.OrderByPropertyName = memberExpression.Member.Name;           
         }
 
         public static FilteredQuery<T> Filter<T>(this IQueryable<T> query, Filter filter) where T : class

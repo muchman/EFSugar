@@ -129,10 +129,7 @@ namespace Tests.FilterTestGoup
             var filter1 = new OrderFilter() { Value = 100, OrderByPropertyName = "UId"};
             filter1.SetOrderBy(f => f.UId);
 
-
-
             var filter2 = new OrderFilter() { OrderByPropertyName = "PName"};//paging should be ignored, we only allow the first filter to decide paging for now
-
 
             var orders = repo.GetQueryable<Order>();
             var firstquery = orders.Filter(filter1);
