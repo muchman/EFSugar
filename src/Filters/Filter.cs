@@ -49,16 +49,23 @@ namespace EFCoreSugar.Filters
             //it should be here since we register it in the constructor, or in the Global BuildFilters call
             EFCoreSugarPropertyCollection.FilterTypeProperties.TryGetValue(ThisType, out var filterProps);
 
-            ParameterExpression entityParam = Expression.Parameter(typeof(T));
+            var type = typeof(T);
+            ParameterExpression entityParam = Expression.Parameter(type);
             Expression<Func<T, bool>> predicate = null;
+            string orderByFinalName = null;
 
             foreach (var filterProp in filterProps)
             {
                 var propValue = filterProp.Property.GetValue(this);
+                var propName = filterProp.Attribute?.PropertyName ?? filterProp.Property.Name;
+
+                if (!string.IsNullOrWhiteSpace(OrderByPropertyName) && filterProp.Property.Name.Equals(OrderByPropertyName, StringComparison.OrdinalIgnoreCase))
+                {
+                    orderByFinalName = propName;
+                }
+
                 if (propValue != null)
                 {
-                    var propName = filterProp.Attribute?.PropertyName ?? filterProp.Property.Name;
-
                     //build the predicate.  We walk the string split incase we have a nested property, this way also negates the need to
                     //find the propertyinfo for this thing.  Its less safe but will be much faster
                     var left = (Expression)entityParam;
@@ -75,6 +82,18 @@ namespace EFCoreSugar.Filters
                     predicate = predicate != null ? predicate.And(subPredicate) : subPredicate;
                 }
             }
+
+
+            if (!string.IsNullOrWhiteSpace(OrderByPropertyName) && orderByFinalName != null)
+            {
+                OrderByPropertyName = orderByFinalName;
+            }
+            else
+            {
+                throw new Exception($"Cannot find OrderByPropertName: {OrderByPropertyName} in filter of type: {ThisType}");
+            }
+
+            predicate = predicate ?? Expression.Lambda<Func<T, bool>>(Expression.Constant(true), Expression.Parameter(type));
 
             query = query.Where(predicate);
 
