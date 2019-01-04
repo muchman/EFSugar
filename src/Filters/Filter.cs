@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
 using EFCoreSugar.Global;
+using Microsoft.EntityFrameworkCore;
+using EFCoreSugar.Enumerations;
 
 namespace EFCoreSugar.Filters
 {
@@ -35,6 +37,10 @@ namespace EFCoreSugar.Filters
         [FilterIgnore]
         public int PageNumber { get { return _PagingFilter.PageNumber; } set { _PagingFilter.PageNumber = value; } }
         private Type ThisType { get; }
+        [FilterIgnore]
+        public string FuzzySearchTerm { get; set; }
+
+        private static MethodInfo LikeMethod = typeof(DbFunctionsExtensions).GetMethod("Like", new[] { typeof(DbFunctions), typeof(string), typeof(string) });
 
         public Filter()
         {
@@ -47,17 +53,34 @@ namespace EFCoreSugar.Filters
         public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
             //it should be here since we register it in the constructor, or in the Global BuildFilters call
-            EFCoreSugarPropertyCollection.FilterTypeProperties.TryGetValue(ThisType, out var filterProps);
+            EFCoreSugarPropertyCollection.FilterTypeProperties.TryGetValue(ThisType, out var filterCache);
 
             var type = typeof(T);
             ParameterExpression entityParam = Expression.Parameter(type);
             Expression<Func<T, bool>> predicate = null;
             string orderByFinalName = null;
+            string fuzzySearchTerm = null;
 
-            foreach (var filterProp in filterProps)
+            if(!string.IsNullOrWhiteSpace(FuzzySearchTerm))
+            {
+                if(filterCache.OperationAttribute == null || filterCache.OperationAttribute.FuzzyMode == FuzzySearchMode.Contains)
+                {
+                    fuzzySearchTerm = $"%{FuzzySearchTerm}%";
+                }
+                else if(filterCache.OperationAttribute.FuzzyMode == FuzzySearchMode.StartsWith)
+                {
+                    fuzzySearchTerm = $"{FuzzySearchTerm}%";
+                }
+                else
+                {
+                    fuzzySearchTerm = $"%{FuzzySearchTerm}";
+                }
+            }
+
+            foreach (var filterProp in filterCache.FilterProperties)
             {
                 var propValue = filterProp.Property.GetValue(this);
-                var propName = filterProp.Attribute?.PropertyName ?? filterProp.Property.Name;
+                var propName = filterProp.PropertyAttribute?.PropertyName ?? filterProp.Property.Name;
 
                 if (!string.IsNullOrWhiteSpace(OrderByPropertyName) && filterProp.Property.Name.Equals(OrderByPropertyName, StringComparison.OrdinalIgnoreCase))
                 {
@@ -76,13 +99,51 @@ namespace EFCoreSugar.Filters
                     var right = Expression.Constant(propValue);
 
                     var subPredicate = Expression.Lambda<Func<T, bool>>(
-                    FilterTestMap[filterProp.Attribute?.Test ?? FilterTest.Equal](left, right),
+                    FilterTestMap[filterProp.PropertyAttribute?.Test ?? FilterTest.Equal](left, right),
                     new[] { entityParam });
 
-                    predicate = predicate != null ? predicate.And(subPredicate) : subPredicate;
+                    if(predicate != null)
+                    {
+                        if(filterProp.Operation == FilterOperation.And)
+                        {
+                            predicate = predicate.And(subPredicate);
+                        }
+                        else
+                        {
+                            predicate = predicate.Or(subPredicate);
+                        }
+                    }
+                    else
+                    {
+                        predicate = subPredicate;
+                    }                   
+                }
+                else if (!string.IsNullOrWhiteSpace(fuzzySearchTerm) && filterProp.Property.PropertyType == typeof(string))
+                {
+                    var left = (Expression)entityParam;
+                    foreach (string name in propName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        left = Expression.PropertyOrField(left, name);
+                    }
+                    var right = Expression.Call(null, LikeMethod, Expression.Constant(EF.Functions), left, Expression.Constant(fuzzySearchTerm));
+                    var subPredicate = Expression.Lambda<Func<T, bool>>(right, new[] { entityParam });
+                    if (predicate != null)
+                    {
+                        if (filterProp.Operation == FilterOperation.And)
+                        {
+                            predicate = predicate.And(subPredicate);
+                        }
+                        else
+                        {
+                            predicate = predicate.Or(subPredicate);
+                        }
+                    }
+                    else
+                    {
+                        predicate = subPredicate;
+                    }
                 }
             }
-
 
             if (!string.IsNullOrWhiteSpace(OrderByPropertyName))
             {
@@ -95,7 +156,6 @@ namespace EFCoreSugar.Filters
                     throw new Exception($"Cannot find OrderByPropertName: {OrderByPropertyName} in filter of type: {ThisType}");
                 }
             }
-
 
             predicate = predicate ?? Expression.Lambda<Func<T, bool>>(Expression.Constant(true), Expression.Parameter(type));
 

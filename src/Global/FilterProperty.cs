@@ -9,12 +9,14 @@ namespace EFCoreSugar.Global
     internal class FilterProperty
     {
         internal PropertyInfo Property { get; set; }
-        internal FilterPropertyAttribute Attribute { get; set; }
+        internal FilterPropertyAttribute PropertyAttribute { get; set; }
+        internal FilterOperation Operation { get; set; }
 
-        internal FilterProperty(PropertyInfo property, FilterPropertyAttribute attribute)
+        public FilterProperty(PropertyInfo property, FilterPropertyAttribute propertyAttribute, FilterOperation operation)
         {
             Property = property;
-            Attribute = attribute;
+            PropertyAttribute = propertyAttribute;
+            Operation = operation;
         }
     }
 }
