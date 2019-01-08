@@ -15,7 +15,7 @@ namespace EFCoreSugar.Global
     {
         private const BindingFlags _BindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase;
 
-        internal static ConcurrentDictionary<Type, IEnumerable<FilterProperty>> FilterTypeProperties { get; } = new ConcurrentDictionary<Type, IEnumerable<FilterProperty>>();
+        internal static ConcurrentDictionary<Type, FilterCache> FilterTypeProperties { get; } = new ConcurrentDictionary<Type, FilterCache>();
         internal static ConcurrentDictionary<Type, IEnumerable<PropertyInfo>> BaseDbRepositoryGroupTypeProperties { get; } = new ConcurrentDictionary<Type, IEnumerable<PropertyInfo>>();
         internal static ConcurrentDictionary<Type, string> DefaultOrderByTypeProperties { get; } = new ConcurrentDictionary<Type, string>();
 
@@ -33,12 +33,16 @@ namespace EFCoreSugar.Global
             var props = type.GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(FilterIgnoreAttribute)));
             List<FilterProperty> propsList = new List<FilterProperty>();
 
+            var baseFilterOperation = type.GetCustomAttribute<FilterOperationAttribute>();
+
             foreach (var prop in props)
             {
-                propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>()));
+                propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>(), prop.GetCustomAttribute<FilterOperationAttribute>()?.Operation ?? baseFilterOperation?.Operation ?? FilterOperation.And));
             }
+      
+            var cache = new FilterCache(propsList, baseFilterOperation);
 
-            FilterTypeProperties.AddOrUpdate(type, propsList, (key, old) => propsList);
+            FilterTypeProperties.AddOrUpdate(type, cache, (key, old) => cache);
 
             return propsList;
         }

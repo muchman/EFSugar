@@ -142,5 +142,52 @@ namespace Tests.FilterTestGoup
         {
             EFCoreSugarGlobal.BuildFilters();
         }
+
+        [Fact]
+        public void FuzzySearchTermTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+            context.Add(new Order() { Id = 1, UserId = 5, OrderTypeId = 1, ProductName = "new", Value = 100 });
+            context.Add(new Order() { Id = 2, UserId = 6, OrderTypeId = 1, ProductName = "kindaoldyeah", Value = 100 });
+            context.Add(new Order() { Id = 3, UserId = 3, OrderTypeId = 1, ProductName = "notold", Value = 100 });
+            context.Add(new Order() { Id = 4, UserId = 6, OrderTypeId = 1, ProductName = "oldandnew", Value = 100 });
+            context.Add(new Order() { Id = 5, UserId = 5, OrderTypeId = 1, ProductName = "win", Value = 100 });
+            context.Add(new Order() { Id = 6, UserId = 3, OrderTypeId = 1, ProductName = "cookie", Value = 100 });
+            context.SaveChanges();
+
+            var filter1 = new OrderFilter() { FuzzyMatchTerm = "old"};
+
+
+            var orders = repo.GetQueryable<Order>();
+            var filtered = orders.Filter(filter1).Resolve();
+            filtered.Value.Count().Should().Be(3);
+            filtered.Value.Count(x => x.ProductName == "kindaoldyeah").Should().Be(1);
+            filtered.Value.Count(x => x.ProductName == "notold").Should().Be(1);
+            filtered.Value.Count(x => x.ProductName == "oldandnew").Should().Be(1);
+        }
+
+        [Fact]
+        public void FilterOperationTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+            context.Add(new User() { Id = 1, FirstName = "Bob", LastName = "Turtle", Age = 35, DOB = DateTime.Parse("1/1/1983") });
+            context.Add(new User() { Id = 2, FirstName = "Jon", LastName = "Conway", Age = 47, DOB = DateTime.Parse("1/1/1982") });
+            context.Add(new User() { Id = 3, FirstName = "Ted", LastName = "Peabody", Age = 47, DOB = DateTime.Parse("1/1/1981") });
+            context.Add(new User() { Id = 4, FirstName = "Marissa", LastName = "Snail", Age = 67, DOB = DateTime.Parse("1/1/1951") });
+            context.SaveChanges();
+
+            var filter1 = new UserFilterOr() { FirstName = "Bob", Age = 47 };
+
+
+            var orders = repo.GetQueryable<User>();
+            var filtered = orders.Filter(filter1).Resolve();
+            filtered.Value.Count().Should().Be(3);
+            filtered.Value.Count(x => x.FirstName == "Bob").Should().Be(1);
+            filtered.Value.Count(x => x.Age == 47).Should().Be(2);
+        }
     }
 }

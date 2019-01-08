@@ -20,5 +20,6 @@ namespace Tests.FakeEntities
 
         [ForeignKey("OrderTypeId")]
         public OrderType OrderType { get; set; }
+        public DateTimeOffset OrderDateTime { get; set; }
     }
 }
