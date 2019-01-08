@@ -4,7 +4,7 @@ using System.Text;
 
 namespace EFCoreSugar.Enumerations
 {
-    public enum FuzzySearchMode
+    public enum FuzzyMatchMode
     {
         Contains,
         StartsWith,

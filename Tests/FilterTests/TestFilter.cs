@@ -1,4 +1,5 @@
-﻿using EFCoreSugar.Filters;
+﻿using EFCoreSugar.Enumerations;
+using EFCoreSugar.Filters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,21 +23,21 @@ namespace Tests.FilterTestGoup
 
     public class UserFilter : Filter
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime DOB { get; set; }
-        public int Age { get; set; }
+        public DateTime? DOB { get; set; }
+        public int? Age { get; set; }
     }
 
-    [FilterOperation(FilterOperation.Or)]
+    [FilterOperation(FuzzyMatchMode.Contains)]
     public class UserFilterOr : Filter
     {
-        public int Id { get; set; }
+        public int? Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime DOB { get; set; }
-        public int Age { get; set; }
+        public DateTime? DOB { get; set; }
+        public int? Age { get; set; }
     }
 }
 

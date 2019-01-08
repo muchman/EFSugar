@@ -9,15 +9,15 @@ namespace EFCoreSugar.Filters
     public class FilterOperationAttribute : Attribute
     {
         public FilterOperation Operation { get; }
-        public FuzzySearchMode FuzzyMode { get; }
+        public FuzzyMatchMode FuzzyMode { get; }
 
-        public FilterOperationAttribute(FilterOperation operation, FuzzySearchMode mode = FuzzySearchMode.Contains)
+        public FilterOperationAttribute(FilterOperation operation, FuzzyMatchMode mode = FuzzyMatchMode.Contains)
         {
             Operation = operation;
             FuzzyMode = mode;
         }
 
-        public FilterOperationAttribute(FuzzySearchMode mode)
+        public FilterOperationAttribute(FuzzyMatchMode mode)
         {
             FuzzyMode = mode;
         }

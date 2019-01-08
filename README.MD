@@ -258,9 +258,45 @@ Starting in v1.1.0 FilteredQuery objects can be composed together with other fil
         }
 ```
 
+### **Filter Operation**
+Starting in v1.2.0 Filters can have a FilterOperation Attribute.  This specifies how the predicte is built with either all "and" (default) or all "or".
+
+```C#
+    //This would translate to Id == <value> || FirstName == <value> || LastName == <value> ...etc.
+    [FilterOperation(FilterOperation.Or)]
+    public class UserFilter : Filter
+    {
+        public int? Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public DateTime? DOB { get; set; }
+        public int? Age { get; set; }
+    }
+```
+
+### **FuzzyMatchTerm**
+Starting in v1.2.0 Filters all have a FuzzyMatchTerm property.  It's behavior can be set by the FilterOperation Attribute to: 
+* Contains (default)
+* StartsWith
+* EndsWith.  
+
+If you specify a value for a FuzzyMatchTerm it will try to apply a match based on the FuzzyMatchMode to all string properties that do not have a value set.  This allows doing things like dynamic partial searches where the user types in something like "Mon" and it finds "Montana", "Monday", "Jack the Monkey"
+
+```C#
+    [FilterOperation(FuzzyMatchMode.Contains)]
+    public class ItemFilter : Filter
+    {
+        public int? Id { get; set; }
+        public string ItemName { get; set; }
+    }
+```
+
 
 ## Release History
-
+* 1.2.0
+    * Fixed filters without any properties set exceptioning while filtering.  You can now use a filter to strictly page or order by.
+    * Added FuzzyMatchTerm
+    * Added FilterOperationAttribute. NOTE: There are plans to extend this capability at the property level to build mixed predicates.
 * 1.1.0
     * Changed namespace to be EFCoreSugar since that makes more sense given the package name and altered the folder structure
     * Made FilteredQuery not have a RecordCount so you can compose filters/queries together.  RecordCount now only appears after you .Resolve() a FilteredQuery.

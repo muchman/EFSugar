@@ -66,11 +66,11 @@ namespace EFCoreSugar.Filters
 
             if(!string.IsNullOrWhiteSpace(FuzzyMatchTerm))
             {
-                if(filterCache.OperationAttribute == null || filterCache.OperationAttribute.FuzzyMode == FuzzySearchMode.Contains)
+                if(filterCache.OperationAttribute == null || filterCache.OperationAttribute.FuzzyMode == FuzzyMatchMode.Contains)
                 {
                     fuzzySearchTerm = $"%{FuzzyMatchTerm}%";
                 }
-                else if(filterCache.OperationAttribute.FuzzyMode == FuzzySearchMode.StartsWith)
+                else if(filterCache.OperationAttribute.FuzzyMode == FuzzyMatchMode.StartsWith)
                 {
                     fuzzySearchTerm = $"{FuzzyMatchTerm}%";
                 }
