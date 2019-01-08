@@ -157,7 +157,7 @@ namespace Tests.FilterTestGoup
             context.Add(new Order() { Id = 6, UserId = 3, OrderTypeId = 1, ProductName = "cookie", Value = 100 });
             context.SaveChanges();
 
-            var filter1 = new OrderFilter() { FuzzySearchTerm = "old"};
+            var filter1 = new OrderFilter() { FuzzyMatchTerm = "old"};
 
 
             var orders = repo.GetQueryable<Order>();

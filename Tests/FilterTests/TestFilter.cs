@@ -16,6 +16,8 @@ namespace Tests.FilterTestGoup
         public int? OrderTypeId { get; set; }
         [FilterProperty("OrderType.Id")]
         public int? NestedOrderTypeId { get; set; }
+        [FilterProperty(FilterTest.GreaterThanEqualTo)]
+        public DateTimeOffset? OrderDateTime { get; set; }
     }
 
     public class UserFilter : Filter
