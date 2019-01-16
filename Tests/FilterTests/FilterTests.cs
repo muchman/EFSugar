@@ -212,5 +212,21 @@ namespace Tests.FilterTestGoup
             filtered.Value.Count(x => x.FirstName == "Bob").Should().Be(1);
             filtered.Value.Count(x => x.Age == 47).Should().Be(2);
         }
+
+        [Fact]
+        public void NullableTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+            context.Add(new User() { Id = 1, FirstName = "Bob", LastName = "Turtle", Age = 35, DOB = DateTime.Parse("1/1/1983") });
+            context.SaveChanges();
+
+            var filter1 = new UserFilter() { DOB = DateTime.Parse("1/1/1983") };
+
+            var orders = repo.GetQueryable<User>();
+            var filtered = orders.Filter(filter1).Resolve();
+            filtered.Value.Count().Should().Be(1);
+        }
     }
 }

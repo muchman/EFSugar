@@ -26,6 +26,7 @@ namespace Tests.FilterTestGoup
         public int? Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        [FilterProperty(FilterTest.GreaterThanEqualTo)]
         public DateTime? DOB { get; set; }
         public int? Age { get; set; }
     }

@@ -113,7 +113,8 @@ namespace EFCoreSugar.Filters
                     //These 2 sections differ only in the right and subpredicate so I just combined them this way
                     if (propValue != null)//we had a value
                     {
-                        right = Expression.Constant(propValue);
+                        //we have to do a conversion or else it will blow up when the entity type is nullable
+                        right = Expression.Convert(Expression.Constant(propValue), left.Type);
 
                         subPredicate = Expression.Lambda<Func<T, bool>>(
                         FilterTestMap[filterProp.PropertyAttribute?.Test ?? FilterTest.Equal](left, right), new[] { entityParam });
