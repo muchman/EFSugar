@@ -61,6 +61,7 @@ namespace EFCoreSugar.Filters
             var type = typeof(T);
             ParameterExpression entityParam = Expression.Parameter(type);
             Expression<Func<T, bool>> predicate = null;
+            Expression<Func<T, bool>> fuzzyMatchPredicate = null;
             string orderByFinalName = null;
             string fuzzySearchTerm = null;
 
@@ -79,6 +80,13 @@ namespace EFCoreSugar.Filters
                     fuzzySearchTerm = $"%{FuzzyMatchTerm}";
                 }
             }
+
+            /*
+             * using a queue we can build up "look behind" to see how to append the next predicate section.
+             * this means we build something like Id && Name && FuzzyMatch1 || FuzzyMatch2 instead of
+             * Id && Name || FuzzyMatch1 || Fuzzymatch2
+             * */
+            Queue<FilterOperation> FilterOperations = new Queue<FilterOperation>();
 
             foreach (var filterProp in filterCache.FilterProperties)
             {
@@ -109,16 +117,22 @@ namespace EFCoreSugar.Filters
 
                         subPredicate = Expression.Lambda<Func<T, bool>>(
                         FilterTestMap[filterProp.PropertyAttribute?.Test ?? FilterTest.Equal](left, right), new[] { entityParam });
+
+                        FilterOperations.Enqueue(filterProp.Operation);
                     }
-                    else//its a fuzzy search
+                    else//its a fuzzy match
                     {
                         right = Expression.Call(null, LikeMethod, Expression.Constant(EF.Functions), left, Expression.Constant(fuzzySearchTerm));
                         subPredicate = Expression.Lambda<Func<T, bool>>(right, new[] { entityParam });
+                        //we always want to OR these together since its a fuzzy match
+                        fuzzyMatchPredicate = fuzzyMatchPredicate?.Or(subPredicate) ?? subPredicate;
+                        //we just drop out, we are going to hold on to this for the end
+                        continue;
                     }
 
                     if(predicate != null)
                     {
-                        if(filterProp.Operation == FilterOperation.And)
+                        if(FilterOperations.Dequeue() == FilterOperation.And)
                         {
                             predicate = predicate.And(subPredicate);
                         }
@@ -142,13 +156,23 @@ namespace EFCoreSugar.Filters
                 }
                 else
                 {
-                    throw new Exception($"Cannot find OrderByPropertName: {OrderByPropertyName} in filter of type: {ThisType}");
+                    throw new Exception($"Cannot find OrderByPropertyName: {OrderByPropertyName} in filter of type: {ThisType}");
                 }
             }
 
-            predicate = predicate ?? Expression.Lambda<Func<T, bool>>(Expression.Constant(true), Expression.Parameter(type));
-
-            query = query.Where(predicate);
+            //now we add the fuzzymatch stuff towards the end as a single group so it doesnt mess up groupings
+            if(fuzzyMatchPredicate != null)
+            {
+                //it makes the most sense to AND this on to whatever we have, if those needs change maybe this becomes configurable?
+                predicate = predicate?.And(fuzzyMatchPredicate) ?? fuzzyMatchPredicate;
+            }
+            
+            //if we have not built anything to filter by dont bother making a where clause.
+            //I had a default of x => true; thing here but that was trying to resolve outside of the sql server sometimes and that is silly.
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
 
             return new FilteredQuery<T>(query, _PagingFilter, _OrderByFilter);
         }

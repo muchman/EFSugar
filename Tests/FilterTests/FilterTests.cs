@@ -169,6 +169,29 @@ namespace Tests.FilterTestGoup
         }
 
         [Fact]
+        public void FuzzySearchTermTestWithId()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+            context.Add(new Order() { Id = 1, UserId = 5, OrderTypeId = 1, ProductName = "new", Value = 100 });
+            context.Add(new Order() { Id = 2, UserId = 6, OrderTypeId = 1, ProductName = "kindaoldyeah", Value = 100 });
+            context.Add(new Order() { Id = 3, UserId = 3, OrderTypeId = 1, ProductName = "notold", Value = 100 });
+            context.Add(new Order() { Id = 4, UserId = 6, OrderTypeId = 1, ProductName = "oldandnew", Value = 100 });
+            context.Add(new Order() { Id = 5, UserId = 5, OrderTypeId = 1, ProductName = "win", Value = 100 });
+            context.Add(new Order() { Id = 6, UserId = 3, OrderTypeId = 1, ProductName = "cookie", Value = 100 });
+            context.SaveChanges();
+
+            var filter1 = new OrderFilter() { UId = 3, FuzzyMatchTerm = "old" };
+
+
+            var orders = repo.GetQueryable<Order>();
+            var filtered = orders.Filter(filter1).Resolve();
+            filtered.Value.Count().Should().Be(1);
+            filtered.Value.Count(x => x.ProductName == "notold").Should().Be(1);
+        }
+
+        [Fact]
         public void FilterOperationTest()
         {
             var repo = ServiceProvider.GetService<FakeRepo>();

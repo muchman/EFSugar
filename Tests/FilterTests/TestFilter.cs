@@ -30,7 +30,7 @@ namespace Tests.FilterTestGoup
         public int? Age { get; set; }
     }
 
-    [FilterOperation(FuzzyMatchMode.Contains)]
+    [FilterOperation(FilterOperation.Or, FuzzyMatchMode.Contains)]
     public class UserFilterOr : Filter
     {
         public int? Id { get; set; }
