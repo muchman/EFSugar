@@ -259,7 +259,7 @@ Starting in v1.1.0 FilteredQuery objects can be composed together with other fil
 ```
 
 ### **Filter Operation**
-Starting in v1.2.0 Filters can have a FilterOperation Attribute.  This specifies how the predicte is built with either all "and" (default) or all "or".
+Starting in v1.2.1 Filters can have a FilterOperation Attribute.  This specifies how the predicte is built with either all "and" (default) or all "or".
 
 ```C#
     //This would translate to Id == <value> || FirstName == <value> || LastName == <value> ...etc.
@@ -275,7 +275,7 @@ Starting in v1.2.0 Filters can have a FilterOperation Attribute.  This specifies
 ```
 
 ### **FuzzyMatchTerm**
-Starting in v1.2.0 Filters all have a FuzzyMatchTerm property.  It's behavior can be set by the FilterOperation Attribute to: 
+Starting in v1.2.1 Filters all have a FuzzyMatchTerm property.  It's behavior can be set by the FilterOperation Attribute to: 
 * Contains (default)
 * StartsWith
 * EndsWith.  
@@ -293,7 +293,10 @@ If you specify a value for a FuzzyMatchTerm it will try to apply a match based o
 
 
 ## Release History
-* 1.2.0
+* 1.2.2
+    * Grouped FuzzyMatchs together and attach them to the end of the predicate with an "AND".  The reason for this is to avoid disrupting the rest of the predicate with force "OR" fuzzy matches so we dont have "Id OR FuzzyMatch1 AND FirstName OR FuzzyMatch2" when we really want "Id AND FirstName And FuzzyMatch1 OR FuzzyMatch2"
+    * Made FilterOperations into a "look behind" so we add the next section of the predicate with the previous properties filteroperation.  This is not particularly jarring right now since operations are filter wide but it's a potential solution when you have something like Id that you want joined with an "AND" and Name that you want joined with an "OR".  Before this change you would get Id OR Name ? (other stuff).  Now you would get Id AND Name OR (other stuff).
+* 1.2.1
     * Fixed filters without any properties set exceptioning while filtering.  You can now use a filter to strictly page or order by.
     * Added FuzzyMatchTerm
     * Added FilterOperationAttribute. NOTE: There are plans to extend this capability at the property level to build mixed predicates.
