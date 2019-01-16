@@ -8,14 +8,14 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIconUrl>https://github.com/muchman/EFSugar/blob/master/ef_sugar_icon.png?raw=true</PackageIconUrl>
     <PackageProjectUrl>https://github.com/muchman/EFSugar</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/muchman/EFSugar</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <Copyright>2018</Copyright>
     <Description>Package to assist in boilerplate of repositories and predicate building with filter objects</Description>
     <PackageTags>EntityFrameworkCore Repository Predicate Sugar</PackageTags>
     <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
-    <Version>1.2.1</Version>
-    <AssemblyVersion>1.2.1.0</AssemblyVersion>
-    <FileVersion>1.2.1.0</FileVersion>
+    <Version>1.2.2</Version>
+    <AssemblyVersion>1.2.2.0</AssemblyVersion>
+    <FileVersion>1.2.2.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
