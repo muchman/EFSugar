@@ -1,7 +1,6 @@
 ﻿using EFCoreSugar;
 using EFCoreSugar.Filters;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -227,27 +226,6 @@ namespace Tests.FilterTestGoup
 
             var orders = repo.GetQueryable<User>();
             var filtered = orders.Filter(filter1).Resolve();
-            filtered.Value.Count().Should().Be(1);
-        }
-
-
-        [Fact]
-        public void NavigationPropertyFilter()
-        {
-            var repo = ServiceProvider.GetService<FakeRepo>();
-            //special data setup
-            var context = ServiceProvider.GetService<TestDbContext>();
-            context.Add(new User() { Id = 1, FirstName = "Bob", LastName = "Turtle", Age = 35, DOB = DateTime.Parse("1/1/1983") });
-            context.Add(new User() { Id = 2, FirstName = "Don", LastName = "Bear", Age = 20, DOB = DateTime.Parse("1/1/1981") });
-            context.Add(new Order() { Id = 1, UserId = 1, ProductName = "Thing" });
-            context.Add(new Order() { Id = 2, UserId = 2, ProductName = "Thing2" });
-            context.Add(new Order() { Id = 3, UserId = 2, ProductName = "Thing3" });
-            context.SaveChanges();
-
-            var filter = new UserOrderNavigationPropFilter() { ProductName = "Thing3" };
-
-            var orders = repo.GetQueryable<User>().Include(u => u.Orders);
-            var filtered = orders.Filter(filter).Resolve();
             filtered.Value.Count().Should().Be(1);
         }
     }
