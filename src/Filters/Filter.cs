@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using EFCoreSugar.Global;
 using Microsoft.EntityFrameworkCore;
 using EFCoreSugar.Enumerations;
+using System.Collections;
 
 namespace EFCoreSugar.Filters
 {
@@ -65,13 +66,13 @@ namespace EFCoreSugar.Filters
             string orderByFinalName = null;
             string fuzzySearchTerm = null;
 
-            if(!string.IsNullOrWhiteSpace(FuzzyMatchTerm))
+            if (!string.IsNullOrWhiteSpace(FuzzyMatchTerm))
             {
-                if(filterCache.OperationAttribute == null || filterCache.OperationAttribute.FuzzyMode == FuzzyMatchMode.Contains)
+                if (filterCache.OperationAttribute == null || filterCache.OperationAttribute.FuzzyMode == FuzzyMatchMode.Contains)
                 {
                     fuzzySearchTerm = $"%{FuzzyMatchTerm}%";
                 }
-                else if(filterCache.OperationAttribute.FuzzyMode == FuzzyMatchMode.StartsWith)
+                else if (filterCache.OperationAttribute.FuzzyMode == FuzzyMatchMode.StartsWith)
                 {
                     fuzzySearchTerm = $"{FuzzyMatchTerm}%";
                 }
@@ -105,6 +106,13 @@ namespace EFCoreSugar.Filters
                     var left = (Expression)entityParam;
                     foreach (string name in propName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
                     {
+                        if (typeof(IEnumerable).IsAssignableFrom(left.Type))
+                        {
+                            var subtype = left.Type.GetGenericArguments()[0];
+                            left = Expression.Call(
+                                typeof(Enumerable), "FirstOrDefault", new Type[] { subtype },
+                                left);
+                        }
                         left = Expression.PropertyOrField(left, name);
                     }
                     Expression right;
@@ -131,9 +139,9 @@ namespace EFCoreSugar.Filters
                         continue;
                     }
 
-                    if(predicate != null)
+                    if (predicate != null)
                     {
-                        if(FilterOperations.Dequeue() == FilterOperation.And)
+                        if (FilterOperations.Dequeue() == FilterOperation.And)
                         {
                             predicate = predicate.And(subPredicate);
                         }
@@ -145,7 +153,7 @@ namespace EFCoreSugar.Filters
                     else
                     {
                         predicate = subPredicate;
-                    }                   
+                    }
                 }
             }
 
@@ -162,12 +170,12 @@ namespace EFCoreSugar.Filters
             }
 
             //now we add the fuzzymatch stuff towards the end as a single group so it doesnt mess up groupings
-            if(fuzzyMatchPredicate != null)
+            if (fuzzyMatchPredicate != null)
             {
                 //it makes the most sense to AND this on to whatever we have, if those needs change maybe this becomes configurable?
                 predicate = predicate?.And(fuzzyMatchPredicate) ?? fuzzyMatchPredicate;
             }
-            
+
             //if we have not built anything to filter by dont bother making a where clause.
             //I had a default of x => true; thing here but that was trying to resolve outside of the sql server sometimes and that is silly.
             if (predicate != null)

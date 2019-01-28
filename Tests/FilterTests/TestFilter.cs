@@ -40,6 +40,12 @@ namespace Tests.FilterTestGoup
         public DateTime? DOB { get; set; }
         public int? Age { get; set; }
     }
+
+    public class UserOrderNavigationPropFilter : Filter
+    {
+        [FilterProperty("Orders.ProductName")]
+        public string ProductName { get; set; }
+    }
 }
 
 
