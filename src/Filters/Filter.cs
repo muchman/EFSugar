@@ -92,11 +92,10 @@ namespace EFCoreSugar.Filters
             foreach (var filterProp in filterCache.FilterProperties)
             {
                 var propValue = filterProp.Property.GetValue(this);
-                var propName = filterProp.PropertyAttribute?.PropertyName ?? filterProp.Property.Name;
 
                 if (!string.IsNullOrWhiteSpace(OrderByPropertyName) && filterProp.Property.Name.Equals(OrderByPropertyName, StringComparison.OrdinalIgnoreCase))
                 {
-                    orderByFinalName = propName;
+                    orderByFinalName = filterProp.PropertyName;
                 }
 
                 if (propValue != null || (!string.IsNullOrWhiteSpace(fuzzySearchTerm) && filterProp.Property.PropertyType == typeof(string)))
@@ -104,7 +103,7 @@ namespace EFCoreSugar.Filters
                     //build the predicate.  We walk the string split incase we have a nested property, this way also negates the need to
                     //find the propertyinfo for this thing.  Its less safe but will be much faster
                     var left = (Expression)entityParam;
-                    foreach (string name in propName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries))
+                    foreach (string name in filterProp.SplitPropertyName)
                     {
                         if (typeof(IEnumerable).IsAssignableFrom(left.Type))
                         {
@@ -117,7 +116,7 @@ namespace EFCoreSugar.Filters
                             left);
                         }
                         left = Expression.PropertyOrField(left, name);
-                        
+
                     }
                     Expression right;
                     Expression<Func<T, bool>> subPredicate;
@@ -129,7 +128,7 @@ namespace EFCoreSugar.Filters
                         right = Expression.Convert(Expression.Constant(propValue), left.Type);
 
                         subPredicate = Expression.Lambda<Func<T, bool>>(
-                        FilterTestMap[filterProp.PropertyAttribute?.Test ?? FilterTest.Equal](left, right), new[] { entityParam });
+                        FilterTestMap[filterProp.Test](left, right), new[] { entityParam });
 
                         FilterOperations.Enqueue(filterProp.Operation);
                     }
