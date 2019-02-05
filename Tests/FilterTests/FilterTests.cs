@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using Tests.FakeDatabase;
+using Tests.FakeDatabase.FakeEntities;
 using Tests.FakeEntities;
 using Tests.FilterTestGoup;
 using Tests.RepoTests;
@@ -242,7 +243,11 @@ namespace Tests.FilterTestGoup
             context.Add(new Order() { Id = 1, UserId = 1, ProductName = "Thing" });
             context.Add(new Order() { Id = 2, UserId = 2, ProductName = "Thing2" });
             context.Add(new Order() { Id = 3, UserId = 2, ProductName = "Thing3" });
+            context.Add(new Part() { Id = 1, OrderId = 2, PartName = "Part2" });
+            context.Add(new Part() { Id = 2, OrderId = 3, PartName = "Part3" });
             context.SaveChanges();
+
+            var result = context.Users.Where(u => u.Orders.Any(o => o.Parts.Any(p => p.PartName == "Part2"))).ToList();
 
             var filter = new UserOrderNavigationPropFilter() { ProductName = "Thing3" };
 

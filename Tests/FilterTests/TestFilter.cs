@@ -45,6 +45,9 @@ namespace Tests.FilterTestGoup
     {
         [FilterProperty("Orders.ProductName")]
         public string ProductName { get; set; }
+
+        [FilterProperty("Orders.Parts.PartName")]
+        public string PartName { get; set; }
     }
 }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using Tests.FakeDatabase.FakeEntities;
 
 namespace Tests.FakeEntities
 {
@@ -20,6 +21,8 @@ namespace Tests.FakeEntities
 
         [ForeignKey("OrderTypeId")]
         public OrderType OrderType { get; set; }
+
+        public ICollection<Part> Parts { get; set; }
         public DateTimeOffset OrderDateTime { get; set; }
     }
 }

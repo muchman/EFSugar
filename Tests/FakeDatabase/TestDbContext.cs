@@ -10,9 +10,9 @@ namespace Tests.FakeDatabase
 {
     public class TestDbContext : DbContext
     {
-        DbSet<Order> Orders { get; set; }
-        DbSet<User> Users{ get; set; }
-        DbSet<OrderType> OrderTypes { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<User> Users{ get; set; }
+        public DbSet<OrderType> OrderTypes { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString());

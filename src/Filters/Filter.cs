@@ -109,11 +109,15 @@ namespace EFCoreSugar.Filters
                         if (typeof(IEnumerable).IsAssignableFrom(left.Type))
                         {
                             var subtype = left.Type.GetGenericArguments()[0];
+                            var newparam = Expression.Parameter(subtype);
+                            var newparamexpress = Expression.PropertyOrField(newparam, name);
                             left = Expression.Call(
-                                typeof(Enumerable), "FirstOrDefault", new Type[] { subtype },
-                                left);
+                                typeof(Enumerable), "Any", new Type[] { subtype },
+                                newparamexpress,
+                            left);
                         }
                         left = Expression.PropertyOrField(left, name);
+                        
                     }
                     Expression right;
                     Expression<Func<T, bool>> subPredicate;
