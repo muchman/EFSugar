@@ -248,8 +248,7 @@ namespace Tests.FilterTestGoup
             context.SaveChanges();
 
             //var result = context.Users.Where(u => u.Orders.Any(o => o.Parts.Any(p => p.PartName == "Part2"))).ToList();
-
-            var filter = new UserOrderNavigationPropFilter() { ProductName = "Thing3" };
+            var filter = new UserOrderNavigationPropFilter() { PartName = "Part3" };
 
             var orders = repo.GetQueryable<User>().Include(u => u.Orders);
             var filtered = orders.Filter(filter).Resolve();
