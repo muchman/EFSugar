@@ -29,6 +29,7 @@ namespace EFCoreSugar.Filters
             };
 
         private static MethodInfo LikeMethod = typeof(DbFunctionsExtensions).GetMethod("Like", new[] { typeof(DbFunctions), typeof(string), typeof(string) });
+        private static MethodInfo BuildPredicateMethod = typeof(Filter).GetMethod("BuildPredicate", BindingFlags.Instance | BindingFlags.NonPublic);
 
         //I made these order and page things public so they can ultimatly be passed into controllers directly by js frameworks without calling additional functions
         [FilterIgnore]
@@ -44,6 +45,13 @@ namespace EFCoreSugar.Filters
 
         private Type ThisType { get; }
 
+        /*
+ * using a queue we can build up "look behind" to see how to append the next predicate section.
+ * this means we build something like Id && Name && FuzzyMatch1 || FuzzyMatch2 instead of
+ * Id && Name || FuzzyMatch1 || Fuzzymatch2
+ * */
+        private Queue<FilterOperation> FilterOperations = new Queue<FilterOperation>();
+
         public Filter()
         {
             //save this so we only reflect once
@@ -54,6 +62,57 @@ namespace EFCoreSugar.Filters
                 EFCoreSugarPropertyCollection.RegisterFilterProperties(ThisType);
             }
         }
+
+        private Expression<Func<T, bool>> BuildPredicate<T>(ParameterExpression predParam, Expression currentLeft, FilterProperty filterProp, object propValue, int index = 0) where T : class
+        {
+            for (;index < filterProp.SplitPropertyName.Length; index++)
+            {
+                var name = filterProp.SplitPropertyName[index];
+                if (typeof(IEnumerable).IsAssignableFrom(currentLeft.Type) && currentLeft.Type != typeof(string))
+                {
+                    var subtype = currentLeft.Type.GetGenericArguments()[0];
+
+                    var method = BuildPredicateMethod.MakeGenericMethod(subtype);
+                    var newparam = Expression.Parameter(subtype);
+                    var expr = (Expression)method.Invoke(this, new object[] { newparam, newparam, filterProp, propValue, index });
+                    currentLeft = Expression.Call(
+                        typeof(Enumerable), "Any", new Type[] { subtype },
+                        currentLeft,
+                        expr
+                    );
+                    return Expression.Lambda<Func<T, bool>>(currentLeft, new[] { predParam });
+                    //need a return here
+                }
+                //else
+                currentLeft = Expression.PropertyOrField(currentLeft, name);
+            }
+
+            Expression<Func<T, bool>> subPredicate1;
+
+            //These 2 sections differ only in the right and subpredicate so I just combined them this way
+            if (propValue != null)//we had a value
+            {
+                //we have to do a conversion or else it will blow up when the entity type is nullable
+                var right = Expression.Convert(Expression.Constant(propValue), currentLeft.Type);
+
+                subPredicate1 = Expression.Lambda<Func<T, bool>>(
+                FilterTestMap[filterProp.Test](currentLeft, right), new[] { predParam });
+
+                FilterOperations.Enqueue(filterProp.Operation);
+
+                return subPredicate1;
+            }
+            else//its a fuzzy match
+            {
+                //var right = Expression.Call(null, LikeMethod, Expression.Constant(EF.Functions), currentLeft, Expression.Constant(fuzzySearchTerm));
+                //subPredicate1 = Expression.Lambda<Func<T2, bool>>(right, new[] { predParam });
+                ////we always want to OR these together since its a fuzzy match
+                //fuzzyMatchPredicate = fuzzyMatchPredicate?.Or(subPredicate1) ?? subPredicate1;
+                //we just drop out, we are going to hold on to this for the end
+                return null;
+            }
+        }
+
         public virtual FilteredQuery<T> ApplyFilter<T>(IQueryable<T> query) where T : class
         {
             //it should be here since we register it in the constructor, or in the Global BuildFilters call
@@ -82,65 +141,75 @@ namespace EFCoreSugar.Filters
                 }
             }
 
-            /*
-             * using a queue we can build up "look behind" to see how to append the next predicate section.
-             * this means we build something like Id && Name && FuzzyMatch1 || FuzzyMatch2 instead of
-             * Id && Name || FuzzyMatch1 || Fuzzymatch2
-             * */
-            Queue<FilterOperation> FilterOperations = new Queue<FilterOperation>();
+
 
             foreach (var filterProp in filterCache.FilterProperties)
             {
-                var propValue = filterProp.Property.GetValue(this);
-
                 if (!string.IsNullOrWhiteSpace(OrderByPropertyName) && filterProp.Property.Name.Equals(OrderByPropertyName, StringComparison.OrdinalIgnoreCase))
                 {
                     orderByFinalName = filterProp.PropertyName;
                 }
 
+                var propValue = filterProp.Property.GetValue(this);
+
                 if (propValue != null || (!string.IsNullOrWhiteSpace(fuzzySearchTerm) && filterProp.Property.PropertyType == typeof(string)))
                 {
                     //build the predicate.  We walk the string split incase we have a nested property, this way also negates the need to
                     //find the propertyinfo for this thing.  Its less safe but will be much faster
+
                     var left = (Expression)entityParam;
-                    foreach (string name in filterProp.SplitPropertyName)
-                    {
-                        if (typeof(IEnumerable).IsAssignableFrom(left.Type))
-                        {
-                            var subtype = left.Type.GetGenericArguments()[0];
-                            var newparam = Expression.Parameter(subtype);
-                            var newparamexpress = Expression.PropertyOrField(newparam, name);
-                            left = Expression.Call(
-                                typeof(Enumerable), "Any", new Type[] { subtype },
-                                newparamexpress,
-                            left);
-                        }
-                        left = Expression.PropertyOrField(left, name);
+                    var subPredicate = BuildPredicate<T>(entityParam, left, filterProp, propValue);
 
-                    }
-                    Expression right;
-                    Expression<Func<T, bool>> subPredicate;
 
-                    //These 2 sections differ only in the right and subpredicate so I just combined them this way
-                    if (propValue != null)//we had a value
-                    {
-                        //we have to do a conversion or else it will blow up when the entity type is nullable
-                        right = Expression.Convert(Expression.Constant(propValue), left.Type);
+                    //var left = (Expression)entityParam;
 
-                        subPredicate = Expression.Lambda<Func<T, bool>>(
-                        FilterTestMap[filterProp.Test](left, right), new[] { entityParam });
+                    //foreach (string name in filterProp.SplitPropertyName)
+                    //{
+                    //    if (typeof(IEnumerable).IsAssignableFrom(left.Type))
+                    //    {
+                    //        var subtype = left.Type.GetGenericArguments()[0];
+                    //        var newparam = Expression.Parameter(subtype);
+                    //        var newparamexpress = Expression.PropertyOrField(newparam, name);
+                    //        left = Expression.Call(
+                    //            typeof(Enumerable), "Any", new Type[] { subtype },
+                    //            newparamexpress,
+                    //        left);
+                    //    }
+                    //    left = Expression.PropertyOrField(left, name);
+                    //}
 
-                        FilterOperations.Enqueue(filterProp.Operation);
-                    }
-                    else//its a fuzzy match
-                    {
-                        right = Expression.Call(null, LikeMethod, Expression.Constant(EF.Functions), left, Expression.Constant(fuzzySearchTerm));
-                        subPredicate = Expression.Lambda<Func<T, bool>>(right, new[] { entityParam });
-                        //we always want to OR these together since its a fuzzy match
-                        fuzzyMatchPredicate = fuzzyMatchPredicate?.Or(subPredicate) ?? subPredicate;
-                        //we just drop out, we are going to hold on to this for the end
-                        continue;
-                    }
+                    //Expression<Func<T, bool>> subPredicate;
+
+                    ////These 2 sections differ only in the right and subpredicate so I just combined them this way
+                    //if (propValue != null)//we had a value
+                    //{
+                    //    //we have to do a conversion or else it will blow up when the entity type is nullable
+                    //    var right = Expression.Convert(Expression.Constant(propValue), left.Type);
+
+                    //    subPredicate = Expression.Lambda<Func<T, bool>>(
+                    //    FilterTestMap[filterProp.Test](left, right), new[] { entityParam });
+
+                    //    FilterOperations.Enqueue(filterProp.Operation);
+                    //}
+                    //else//its a fuzzy match
+                    //{
+                    //    var right = Expression.Call(null, LikeMethod, Expression.Constant(EF.Functions), left, Expression.Constant(fuzzySearchTerm));
+                    //    subPredicate = Expression.Lambda<Func<T, bool>>(right, new[] { entityParam });
+                    //    //we always want to OR these together since its a fuzzy match
+                    //    fuzzyMatchPredicate = fuzzyMatchPredicate?.Or(subPredicate) ?? subPredicate;
+                    //    //we just drop out, we are going to hold on to this for the end
+                    //    continue;
+                    //}
+
+
+
+
+
+
+
+
+
+
 
                     if (predicate != null)
                     {

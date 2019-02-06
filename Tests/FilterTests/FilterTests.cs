@@ -247,7 +247,7 @@ namespace Tests.FilterTestGoup
             context.Add(new Part() { Id = 2, OrderId = 3, PartName = "Part3" });
             context.SaveChanges();
 
-            var result = context.Users.Where(u => u.Orders.Any(o => o.Parts.Any(p => p.PartName == "Part2"))).ToList();
+            //var result = context.Users.Where(u => u.Orders.Any(o => o.Parts.Any(p => p.PartName == "Part2"))).ToList();
 
             var filter = new UserOrderNavigationPropFilter() { ProductName = "Thing3" };
 
