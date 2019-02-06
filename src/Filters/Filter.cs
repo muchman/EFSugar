@@ -68,7 +68,7 @@ namespace EFCoreSugar.Filters
             for (;index < filterProp.SplitPropertyName.Length; index++)
             {
                 var name = filterProp.SplitPropertyName[index];
-                if (typeof(IEnumerable).IsAssignableFrom(currentLeft.Type) && currentLeft.Type != typeof(string))
+                if (typeof(IEnumerable).IsAssignableFrom(currentLeft.Type))
                 {
                     var subtype = currentLeft.Type.GetGenericArguments()[0];
                     var method = BuildPredicateMethod.MakeGenericMethod(subtype);
