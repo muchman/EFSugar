@@ -90,8 +90,16 @@ namespace EFCoreSugar.Filters
             //we build the right differently for fuzzy vs not
             if (!fuzzyMatch)
             {
-                //we have to do a conversion or else it will blow up when the entity type is nullable
-                var right = Expression.Convert(Expression.Constant(propValue), currentLeft.Type);
+                Expression right;
+                if (typeof(IEnumerable).IsAssignableFrom(filterProp.Property.PropertyType))
+                {
+                    right = Expression.Call(typeof(Enumerable), "Contains", new Type[] { typeof(T) }, Expression.Constant(propValue), currentLeft);
+                }
+                else
+                {
+                    //we have to do a conversion or else it will blow up when the entity type is nullable
+                    right = Expression.Convert(Expression.Constant(propValue), currentLeft.Type);
+                }
 
                 subPredicate = Expression.Lambda<Func<T, bool>>(
                 FilterTestMap[filterProp.Test](currentLeft, right), new[] { predParam });
