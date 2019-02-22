@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EFCoreSugar.Repository
 {
@@ -41,22 +43,54 @@ namespace EFCoreSugar.Repository
             return entity;
         }
 
-        public void Delete<TEntity>(TEntity entity) where TEntity : class
+        public async Task<TEntity> CreateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class
+        {
+            await DBContext.Set<TEntity>().AddAsync(entity);
+            if (!_deferred)
+            {
+                await DBContext.SaveChangesAsync(cancellationToken);
+            }
+            return entity;
+        }
+
+        public int Delete<TEntity>(TEntity entity) where TEntity : class
         {
             DBContext.Set<TEntity>().Remove(entity);
             if (!_deferred)
             {
-                DBContext.SaveChanges();
+                return DBContext.SaveChanges();
             }
+            return 0;
         }
 
-        public void Update<TEntity>(TEntity entity) where TEntity : class
+        public async Task<int> DeleteAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken) ) where TEntity : class
+        {
+            DBContext.Set<TEntity>().Remove(entity);
+            if (!_deferred)
+            {
+                return await DBContext.SaveChangesAsync(cancellationToken);
+            }
+            return 0;
+        }
+
+        public int Update<TEntity>(TEntity entity) where TEntity : class
         {
             DBContext.Entry(entity).State = EntityState.Modified;
             if (!_deferred)
             {
-                DBContext.SaveChanges();
+                return DBContext.SaveChanges();
             }
+            return 0;
+        }
+
+        public async Task<int> UpdateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class
+        {
+            DBContext.Entry(entity).State = EntityState.Modified;
+            if (!_deferred)
+            {
+               return await DBContext.SaveChangesAsync(cancellationToken);
+            }
+            return 0;
         }
 
         public void SetDeferred(bool defer)
@@ -64,25 +98,49 @@ namespace EFCoreSugar.Repository
             _deferred = defer;
         }
 
-        public void SaveChanges()
+        public int SaveChanges()
         {
-            DBContext.SaveChanges();
+            return DBContext.SaveChanges();
+        }
+
+        public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return await DBContext.SaveChangesAsync(cancellationToken);
         }
 
         public IQueryable<TEntity> GetQueryable<TEntity>(bool trackChanges = true) where TEntity : class
         {
-            var dbset = DBContext.Set<TEntity>();
-            IQueryable<TEntity> queryable;
-            if (trackChanges)
+            try
             {
-                queryable = dbset.AsQueryable();
+                var dbset = DBContext.Set<TEntity>();
+                if (trackChanges)
+                {
+                    return dbset.AsQueryable();
+                }
+                else
+                {
+                    return dbset.AsNoTracking();
+                }
             }
-            else
-            {
-                queryable = dbset.AsNoTracking();
+            catch(InvalidCastException ex)
+            { 
+                var dbquery = DBContext.Query<TEntity>();
+                if(dbquery != null)
+                {
+                    if (trackChanges)
+                    {
+                        return dbquery.AsQueryable();
+                    }
+                    else
+                    {
+                        return dbquery.AsNoTracking();
+                    }
+                }
+                else
+                {
+                    throw new Exception($"No Set or DbQuery of type {typeof(TEntity)} found.");
+                }
             }
-
-            return queryable;
         }
 
         public IEnumerable<TEntity> GetAll<TEntity>(bool trackChanges = true) where TEntity : class

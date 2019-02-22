@@ -3,6 +3,7 @@ using EFCoreSugar.Filters;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Tests.FakeEntities;
 
 namespace Tests.FilterTestGoup
 {
@@ -39,6 +40,22 @@ namespace Tests.FilterTestGoup
         public string LastName { get; set; }
         public DateTime? DOB { get; set; }
         public int? Age { get; set; }
+    }
+
+    public class UserOrderNavigationPropFilter : Filter
+    {
+        [FilterProperty("Orders.ProductName")]
+        public string ProductName { get; set; }
+
+        [FilterProperty("Orders.Parts.PartName")]
+        public string PartName { get; set; }
+    }
+
+    public class CollectionFilter : Filter
+    {
+        public int? Id { get; set; }
+        [FilterProperty("Status")]
+        public List<OrderStatus> StatusList { get; set; }
     }
 }
 

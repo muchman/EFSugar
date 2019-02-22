@@ -1,5 +1,6 @@
 ﻿using EFCoreSugar.Global;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -36,11 +37,20 @@ namespace EFCoreSugar.Filters
 
             var command = OrderByDirection == OrderByDirection.Descending ? nested ? "ThenByDescending" : "OrderByDescending" : nested ? "ThenBy" : "OrderBy";
             var parameter = Expression.Parameter(type, "p");
-            Expression memberAccess = null;
+            Expression memberAccess = parameter;
 
             foreach (var property in PropertyName.Split('.'))
             {
-                memberAccess = Expression.Property(memberAccess ?? parameter, property);
+                if(typeof(IEnumerable).IsAssignableFrom(memberAccess.Type))
+                {
+                    var subtype = memberAccess.Type.GetGenericArguments()[0];
+                    memberAccess = Expression.Call(
+                     typeof(Enumerable),
+                     "FirstOrDefault",
+                     new Type[] { subtype},
+                     memberAccess);
+                }
+                memberAccess = Expression.Property(memberAccess, property);
             }
 
             return new OrderByFilterOperation(PropertyName, command, memberAccess.Type, Expression.Lambda(memberAccess, parameter));

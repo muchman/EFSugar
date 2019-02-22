@@ -9,14 +9,18 @@ namespace EFCoreSugar.Global
     internal class FilterProperty
     {
         internal PropertyInfo Property { get; set; }
-        internal FilterPropertyAttribute PropertyAttribute { get; set; }
+        public string PropertyName { get; set; }
+        public string[] SplitPropertyName { get; set; }
         internal FilterOperation Operation { get; set; }
+        internal FilterTest Test { get; set; }
 
         public FilterProperty(PropertyInfo property, FilterPropertyAttribute propertyAttribute, FilterOperation operation)
         {
             Property = property;
-            PropertyAttribute = propertyAttribute;
             Operation = operation;
+            PropertyName = propertyAttribute?.PropertyName ?? Property.Name;
+            SplitPropertyName = PropertyName.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+            Test = propertyAttribute?.Test ?? FilterTest.Equal;
         }
     }
 }

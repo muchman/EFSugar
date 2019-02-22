@@ -103,6 +103,9 @@ public void DoWork()
     newUser.Name = "EFCoreSugar";
     _repository.Update(newUser);
 
+    //As of 1.2.4 there are also async version of these CRUD calls with optional cancellationToken
+    newUser = _repository.CreateAsync(new User(){Name = "Sugar"}, cancellationToken);
+
     //additionally we can use a deferred status to do bulk operations.  This prevents a call
     //to SaveChanges() so we are not calling out to the DB on every operation which can be very slow
     //in this kind of situation
@@ -144,6 +147,8 @@ Filters allow dynamically building where clauses based on which properties are s
    * Composed Filters by means of filtering a FilteredQuery will try this default OrderBy behavior on the *FIRST* filter and it will ignore other orderbys *UNLESS* you specify the OrderByPropertyName *AND* it is not already in a previous OrderBy.
 4. Composed filters will use the paging of the first filter and will ignore all other paging from other filters so set it there.
 5. The ordering and paging are applied when a FilteredQuery is .Resolved().  If you access the query from the FilteredQuery and resolve it manually with a ToList() it will not be paged or ordered.  *In the future this behavior may change so avoid accessing the query directly unless you have to or append to the query and resolve its FilteredQuery parent.*
+6. As of 1.2.4 Enumerable collections are allowed in the filter having them map a single property in the entity.  This resolves with a .Contains().
+7. As of 1.2.4 Enumerable navigation properties on the entity are supported when they are a part of the property path in the [FilterProperty()] attribute.  This will resolve with .Any() and can be nested.
 
 Setup:
 
@@ -188,6 +193,11 @@ Usage:
         //query we just use the FilterIgnore attribute
         [FilterIgnore]
         public string SpecialThing {get; set;}
+        //As of 1.2.4 you can have a collection on the filter side that maps to a 
+        //single property in the entity.  This will resolve with a .Contains().  
+        //This example would look like (entity => StatusList.Contains(entity.Status))
+        [FilterProperty("Status")]
+        public List<OrderStatus> StatusList {get; set;}
     }
 ```
 
@@ -293,6 +303,11 @@ If you specify a value for a FuzzyMatchTerm it will try to apply a match based o
 
 
 ## Release History
+* 1.2.4
+    * Add the ability to resolve collection navigation properties in the entity. It will do a look up on the collection with .Any(\<predicate>) for the final condition.  It is nested so you can end up with expressions that look like query.Where(x => x.Users.Any(u => u.Items.Any(i => i.Name == "Hat")))
+    * Add the ability to resolve a collection on the filter side.  This will resolve with a .Contains().  This way you can have something like a List\<someEnum>() against an entity with an Enum property.  This ends up looking like query.Where(x => ( Enum1, Enum2, Enum3 ).Contains( x.Status ))
+    * Added several async calls to the repository for things like SaveChanges,Create,Update,Delete.
+
 * 1.2.3
 	* Fixed the issue where a nullable entity type would fail with an error similar to no comparison GreaterThanOrEqualTo between some nullable thing and not nullable thing.
 * 1.2.2

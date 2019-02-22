@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EFCoreSugar.Repository
 {
@@ -20,9 +22,14 @@ namespace EFCoreSugar.Repository
             return ParentBaseRepository.GetAll<TEntity>();
         }
 
-        public virtual void Update(TEntity entity)
+        public virtual int Update(TEntity entity)
         {
-            ParentBaseRepository.Update(entity);
+            return ParentBaseRepository.Update(entity);
+        }
+
+        public virtual async Task<int> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return await ParentBaseRepository.UpdateAsync(entity, cancellationToken);
         }
 
         protected virtual IQueryable<TEntity> GetQueryable()
@@ -30,18 +37,39 @@ namespace EFCoreSugar.Repository
             return ParentBaseRepository.GetQueryable<TEntity>();
         }
 
+        protected virtual IQueryable<T> GetQueryable<T>() where T : class
+        {
+            return ParentBaseRepository.GetQueryable<T>();
+        }
+
         public virtual TEntity Create(TEntity entity)
         {
             return ParentBaseRepository.Create(entity);
         }
 
-        public virtual void Delete(TEntity entity)
+        public virtual async Task<TEntity> CreateAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
         {
-            ParentBaseRepository.Delete(entity);
+            return await ParentBaseRepository.CreateAsync(entity, cancellationToken);
         }
+
+        public virtual int Delete(TEntity entity)
+        {
+            return ParentBaseRepository.Delete(entity);
+        }
+
+        public virtual async Task<int> DeleteAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return await ParentBaseRepository.DeleteAsync(entity, cancellationToken);
+        }
+
         protected DbSet<T> Set<T>() where T : class
         {
             return ParentBaseRepository.DBContext.Set<T>();
+        }
+
+        protected DbQuery<T> Query<T>() where T : class
+        {
+            return ParentBaseRepository.DBContext.Query<T>();
         }
     }
 }

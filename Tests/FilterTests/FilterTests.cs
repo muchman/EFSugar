@@ -1,10 +1,13 @@
 ﻿using EFCoreSugar;
 using EFCoreSugar.Filters;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Tests.FakeDatabase;
+using Tests.FakeDatabase.FakeEntities;
 using Tests.FakeEntities;
 using Tests.FilterTestGoup;
 using Tests.RepoTests;
@@ -227,6 +230,101 @@ namespace Tests.FilterTestGoup
             var orders = repo.GetQueryable<User>();
             var filtered = orders.Filter(filter1).Resolve();
             filtered.Value.Count().Should().Be(1);
+        }
+
+
+        [Fact]
+        public void NavigationCollectionPropertyFilter()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+            context.Add(new User() { Id = 1, FirstName = "Bob", LastName = "Turtle", Age = 35, DOB = DateTime.Parse("1/1/1983") });
+            context.Add(new User() { Id = 2, FirstName = "Don", LastName = "Bear", Age = 20, DOB = DateTime.Parse("1/1/1981") });
+            context.Add(new Order() { Id = 1, UserId = 1, ProductName = "Thing" });
+            context.Add(new Order() { Id = 2, UserId = 2, ProductName = "Thing2" });
+            context.Add(new Order() { Id = 3, UserId = 2, ProductName = "Thing3" });
+            context.Add(new Part() { Id = 1, OrderId = 2, PartName = "Part2" });
+            context.Add(new Part() { Id = 2, OrderId = 3, PartName = "Part3" });
+            context.SaveChanges();
+
+            //var result = context.Users.Where(u => u.Orders.Any(o => o.Parts.Any(p => p.PartName == "Part2"))).ToList();
+            var filter = new UserOrderNavigationPropFilter() { PartName = "Part3" };
+
+            var orders = repo.GetQueryable<User>().Include(u => u.Orders).ThenInclude(o => o.Parts);
+            var filtered = orders.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(1);
+        }
+
+        [Fact]
+        public void NavigationCollectionPropertyFuzzy()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+            context.Add(new User() { Id = 1, FirstName = "Bob", LastName = "Turtle", Age = 35, DOB = DateTime.Parse("1/1/1983") });
+            context.Add(new User() { Id = 2, FirstName = "Don", LastName = "Bear", Age = 20, DOB = DateTime.Parse("1/1/1981") });
+            context.Add(new Order() { Id = 1, UserId = 1, ProductName = "Thing" });
+            context.Add(new Order() { Id = 2, UserId = 2, ProductName = "Thing2" });
+            context.Add(new Order() { Id = 3, UserId = 2, ProductName = "Thing3" });
+            context.Add(new Part() { Id = 1, OrderId = 1, PartName = "Part1" });
+            context.Add(new Part() { Id = 2, OrderId = 2, PartName = "Part2" });
+            context.Add(new Part() { Id = 3, OrderId = 3, PartName = "Part3" });
+            context.SaveChanges();
+
+            var filter = new UserOrderNavigationPropFilter() { FuzzyMatchTerm = "Part" };
+
+            var orders = repo.GetQueryable<User>().Include(u => u.Orders).ThenInclude(o => o.Parts);
+            var filtered = orders.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(2);
+        }
+
+        [Fact]
+        public void NavigationCollectionPropertyOrderBy()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+            context.Add(new User() { Id = 1, FirstName = "Bob", LastName = "Turtle", Age = 35, DOB = DateTime.Parse("1/1/1983") });
+            context.Add(new User() { Id = 2, FirstName = "Don", LastName = "Bear", Age = 20, DOB = DateTime.Parse("1/1/1981") });
+            context.Add(new Order() { Id = 1, UserId = 1, ProductName = "Thing" });
+            context.Add(new Order() { Id = 2, UserId = 2, ProductName = "Thing2" });
+            context.Add(new Order() { Id = 3, UserId = 2, ProductName = "Thing3" });
+            context.Add(new Part() { Id = 1, OrderId = 1, PartName = "Part1" });
+            context.Add(new Part() { Id = 2, OrderId = 2, PartName = "Part2" });
+            context.Add(new Part() { Id = 3, OrderId = 3, PartName = "Part3" });
+            context.SaveChanges();
+
+
+            //var result = context.Users.OrderByDescending(u => u.Orders.FirstOrDefault().Parts.FirstOrDefault().PartName);
+
+            var filter = new UserOrderNavigationPropFilter() { OrderByPropertyName = "PartName", OrderByDirection = OrderByDirection.Descending };
+
+
+            var orders = repo.GetQueryable<User>().Include(u => u.Orders).ThenInclude(o => o.Parts);
+            var filtered = orders.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(2);
+            filtered.Value.First().Orders.First().Parts.First().PartName.Should().Be("Part2");
+        }
+
+        [Fact]
+        public void FilterCollectionTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+
+            context.Add(new Order() { Id = 1, UserId = 1, ProductName = "Thing", Status = OrderStatus.Completed });
+            context.Add(new Order() { Id = 2, UserId = 2, ProductName = "Thing2", Status = OrderStatus.InProgress });
+            context.Add(new Order() { Id = 3, UserId = 3, ProductName = "Thing3", Status = OrderStatus.Void });
+
+            context.SaveChanges();
+
+            var filter = new CollectionFilter { StatusList = new List<OrderStatus> { OrderStatus.Completed, OrderStatus.InProgress } };
+
+            var orders = repo.GetQueryable<Order>();
+            var filtered = orders.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(2);
         }
     }
 }
