@@ -3,6 +3,7 @@ using EFCoreSugar.Filters;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Tests.FakeEntities;
 
 namespace Tests.FilterTestGoup
 {
@@ -48,6 +49,13 @@ namespace Tests.FilterTestGoup
 
         [FilterProperty("Orders.Parts.PartName")]
         public string PartName { get; set; }
+    }
+
+    public class CollectionFilter : Filter
+    {
+        public int? Id { get; set; }
+        [FilterProperty("Status")]
+        public List<OrderStatus> StatusList { get; set; }
     }
 }
 

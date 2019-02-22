@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using Tests.FakeDatabase;
+using Tests.FakeDatabase.FakeEntities;
 using Tests.FakeEntities;
 using Tests.FilterTestGoup;
 using Xunit;
@@ -33,6 +34,14 @@ namespace Tests.RepoTests
             irepo.UserGroup.GetUsersBySpecialMagic("stuff").Should().Be(1);
             repo.UserGroup.GetUsersBySpecialMagic("stuff").Should().Be(1);
             repo.ConcreteUserGroup.GetUsersBySpecialMagic("stuff").Should().Be(1);
+        }
+
+        [Fact]
+        public void GetQueryablyTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            repo.GetQueryable<User>().Should().NotBeNull();
+            repo.GetQueryable<SomeView>().Should().NotBeNull();
         }
     }
 }

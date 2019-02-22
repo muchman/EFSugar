@@ -85,24 +85,29 @@ namespace EFCoreSugar.Filters
                 currentLeft = Expression.PropertyOrField(currentLeft, name);
             }
 
-            Expression<Func<T, bool>> subPredicate;
+            Expression<Func<T, bool>> subPredicate = null;
 
             //we build the right differently for fuzzy vs not
             if (!fuzzyMatch)
             {
                 Expression right;
-                if (typeof(IEnumerable).IsAssignableFrom(filterProp.Property.PropertyType))
+                //this is for when we have an enumerable in the filter and we want to map it to a singular property on the entity
+                if (typeof(IEnumerable).IsAssignableFrom(filterProp.Property.PropertyType) && filterProp.Property.PropertyType != typeof(string))
                 {
-                    right = Expression.Call(typeof(Enumerable), "Contains", new Type[] { typeof(T) }, Expression.Constant(propValue), currentLeft);
+                    var propValueConstant = Expression.Constant(propValue);
+                    var subtype = propValueConstant.Type.GetGenericArguments()[0];
+                    right = Expression.Call(typeof(Enumerable), "Contains", new Type[] { subtype }, propValueConstant, currentLeft);
+                    subPredicate = Expression.Lambda<Func<T, bool>>(right, new[] { predParam });
                 }
                 else
                 {
                     //we have to do a conversion or else it will blow up when the entity type is nullable
                     right = Expression.Convert(Expression.Constant(propValue), currentLeft.Type);
+                    subPredicate = Expression.Lambda<Func<T, bool>>(
+                    FilterTestMap[filterProp.Test](currentLeft, right), new[] { predParam });
                 }
 
-                subPredicate = Expression.Lambda<Func<T, bool>>(
-                FilterTestMap[filterProp.Test](currentLeft, right), new[] { predParam });
+                
                 //we enqueue the filteroperations to do "look back" style of operations
                 FilterOperations.Enqueue(filterProp.Operation);
             }

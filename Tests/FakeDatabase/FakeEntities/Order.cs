@@ -24,5 +24,15 @@ namespace Tests.FakeEntities
 
         public ICollection<Part> Parts { get; set; }
         public DateTimeOffset OrderDateTime { get; set; }
+        public OrderStatus Status { get; set; }
+    }
+
+    public enum OrderStatus
+    {
+        New,
+        BackOrdered,
+        InProgress,
+        Completed,
+        Void
     }
 }

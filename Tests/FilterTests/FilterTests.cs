@@ -4,6 +4,7 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Tests.FakeDatabase;
 using Tests.FakeDatabase.FakeEntities;
@@ -304,6 +305,26 @@ namespace Tests.FilterTestGoup
             var filtered = orders.Filter(filter).Resolve();
             filtered.Value.Count().Should().Be(2);
             filtered.Value.First().Orders.First().Parts.First().PartName.Should().Be("Part2");
+        }
+
+        [Fact]
+        public void FilterCollectionTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+
+            context.Add(new Order() { Id = 1, UserId = 1, ProductName = "Thing", Status = OrderStatus.Completed });
+            context.Add(new Order() { Id = 2, UserId = 2, ProductName = "Thing2", Status = OrderStatus.InProgress });
+            context.Add(new Order() { Id = 3, UserId = 3, ProductName = "Thing3", Status = OrderStatus.Void });
+
+            context.SaveChanges();
+
+            var filter = new CollectionFilter { StatusList = new List<OrderStatus> { OrderStatus.Completed, OrderStatus.InProgress } };
+
+            var orders = repo.GetQueryable<Order>();
+            var filtered = orders.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(2);
         }
     }
 }

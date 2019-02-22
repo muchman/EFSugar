@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EFCoreSugar.Repository
 {
@@ -10,10 +12,14 @@ namespace EFCoreSugar.Repository
     {
         DbContext DBContext { get; }
         TEntity Create<TEntity>(TEntity entity) where TEntity : class;
-        void Delete<TEntity>(TEntity entity) where TEntity : class;
-        void SaveChanges();
+        Task<TEntity> CreateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class;
+        int Delete<TEntity>(TEntity entity) where TEntity : class;
+        Task<int> DeleteAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class;
+        int SaveChanges();
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken));
+        int Update<TEntity>(TEntity entity) where TEntity : class;
+        Task<int> UpdateAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class;
         void SetDeferred(bool defer);
-        void Update<TEntity>(TEntity entity) where TEntity : class;
         IQueryable<TEntity> GetQueryable<TEntity>(bool trackChanges = true) where TEntity : class;
         IEnumerable<TEntity> GetAll<TEntity>(bool trackChanges = true) where TEntity : class;
         TEntity GetSingle<TEntity>(object key, bool trackChanges = true) where TEntity : class;
