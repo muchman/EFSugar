@@ -307,7 +307,8 @@ If you specify a value for a FuzzyMatchTerm it will try to apply a match based o
     * Add the ability to resolve collection navigation properties in the entity. It will do a look up on the collection with .Any(\<predicate>) for the final condition.  It is nested so you can end up with expressions that look like query.Where(x => x.Users.Any(u => u.Items.Any(i => i.Name == "Hat")))
     * Add the ability to resolve a collection on the filter side.  This will resolve with a .Contains().  This way you can have something like a List\<someEnum>() against an entity with an Enum property.  This ends up looking like query.Where(x => ( Enum1, Enum2, Enum3 ).Contains( x.Status ))
     * Added several async calls to the repository for things like SaveChanges,Create,Update,Delete.
-
+    * Added Query<T>() to the repositorygroups to get DbQuery types from the context.
+    * Calling GetQueryable<T>() from the Repository or RepositoryGroup will first try to get a DbSet and then try to get a DbQuery.
 * 1.2.3
 	* Fixed the issue where a nullable entity type would fail with an error similar to no comparison GreaterThanOrEqualTo between some nullable thing and not nullable thing.
 * 1.2.2
