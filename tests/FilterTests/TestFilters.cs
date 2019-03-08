@@ -41,11 +41,11 @@ namespace Tests.FilterTestGoup
         public DateTime? DOB { get; set; }
         public int? Age { get; set; }
     }
-    [FuzzyMatch(FuzzyMatchMode.None)]
+    [FilterFuzzyMatch(FuzzyMatchMode.None)]
     public class UserFilterSpecialFuzzy : Filter
     {
         public int? Id { get; set; }
-        [FuzzyMatch(FuzzyMatchMode.EndsWith)]
+        [FilterFuzzyMatch(FuzzyMatchMode.EndsWith)]
         public string FirstName { get; set; }
         public string LastName { get; set; }
         [FilterProperty(FilterTest.GreaterThanEqualTo)]

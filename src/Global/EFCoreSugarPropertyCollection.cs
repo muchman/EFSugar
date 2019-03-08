@@ -35,13 +35,13 @@ namespace EFCoreSugar.Global
             List<FilterProperty> propsList = new List<FilterProperty>();
 
             var baseFilterOperation = type.GetCustomAttribute<FilterOperationAttribute>();
-            var baseFuzzyMatchMode = type.GetCustomAttribute<FuzzyMatchAttribute>();
+            var baseFuzzyMatchMode = type.GetCustomAttribute<FilterFuzzyMatchAttribute>();
 
             foreach (var prop in props)
             {
                 propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>(), 
                     prop.GetCustomAttribute<FilterOperationAttribute>()?.Operation ?? baseFilterOperation?.Operation ?? FilterOperation.And,
-                    prop.GetCustomAttribute<FuzzyMatchAttribute>()?.FuzzyMatchMode ?? baseFuzzyMatchMode?.FuzzyMatchMode ?? FuzzyMatchMode.Contains));
+                    prop.GetCustomAttribute<FilterFuzzyMatchAttribute>()?.FuzzyMatchMode ?? baseFuzzyMatchMode?.FuzzyMatchMode ?? FuzzyMatchMode.Contains));
             }
       
             var cache = new FilterCache(propsList, baseFilterOperation);

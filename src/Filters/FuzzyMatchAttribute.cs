@@ -6,11 +6,11 @@ using System.Text;
 namespace EFCoreSugar.Filters
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    public class FuzzyMatchAttribute : Attribute
+    public class FilterFuzzyMatchAttribute : Attribute
     {
         public FuzzyMatchMode FuzzyMatchMode { get; }
 
-        public FuzzyMatchAttribute(FuzzyMatchMode mode)
+        public FilterFuzzyMatchAttribute(FuzzyMatchMode mode)
         {
             FuzzyMatchMode = mode;
         }
