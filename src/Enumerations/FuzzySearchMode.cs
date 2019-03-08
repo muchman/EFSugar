@@ -8,6 +8,7 @@ namespace EFCoreSugar.Enumerations
     {
         Contains,
         StartsWith,
-        EndsWith
+        EndsWith,
+        None
     }
 }

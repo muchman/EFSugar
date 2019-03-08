@@ -1,4 +1,5 @@
-﻿using EFCoreSugar.Filters;
+﻿using EFCoreSugar.Enumerations;
+using EFCoreSugar.Filters;
 using EFCoreSugar.Repository;
 using EFCoreSugar.Repository.Interfaces;
 using System;
@@ -34,10 +35,13 @@ namespace EFCoreSugar.Global
             List<FilterProperty> propsList = new List<FilterProperty>();
 
             var baseFilterOperation = type.GetCustomAttribute<FilterOperationAttribute>();
+            var baseFuzzyMatchMode = type.GetCustomAttribute<FuzzyMatchAttribute>();
 
             foreach (var prop in props)
             {
-                propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>(), prop.GetCustomAttribute<FilterOperationAttribute>()?.Operation ?? baseFilterOperation?.Operation ?? FilterOperation.And));
+                propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>(), 
+                    prop.GetCustomAttribute<FilterOperationAttribute>()?.Operation ?? baseFilterOperation?.Operation ?? FilterOperation.And,
+                    prop.GetCustomAttribute<FuzzyMatchAttribute>()?.FuzzyMatchMode ?? baseFuzzyMatchMode?.FuzzyMatchMode ?? FuzzyMatchMode.Contains));
             }
       
             var cache = new FilterCache(propsList, baseFilterOperation);

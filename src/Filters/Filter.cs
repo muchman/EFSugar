@@ -18,7 +18,7 @@ namespace EFCoreSugar.Filters
 
         //TODO: rework how this is handled, I didnt want people to import the expression stuff just to define the type of comparar they wanted
         private static Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>> FilterTestMap =
-            new Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>>()
+            new Dictionary<FilterTest, Func<Expression, Expression, BinaryExpression>>
             {
                         { FilterTest.Equal, Expression.Equal},
                         { FilterTest.GreaterThan, Expression.GreaterThan },
@@ -27,6 +27,13 @@ namespace EFCoreSugar.Filters
                         { FilterTest.LessThanEqualTo, Expression.LessThanOrEqual},
                         { FilterTest.NotEqual, Expression.NotEqual }
             };
+
+        private static Dictionary<FuzzyMatchMode, Func<string, string>> FuzzyMatchFormats = new Dictionary<FuzzyMatchMode, Func<string, string>>
+        {
+            {FuzzyMatchMode.Contains, term => $"%{term}%" },
+            {FuzzyMatchMode.StartsWith, term => $"{term}%" },
+            {FuzzyMatchMode.EndsWith, term => $"%{term}" },
+        };
 
         private static MethodInfo LikeMethod = typeof(DbFunctionsExtensions).GetMethod("Like", new[] { typeof(DbFunctions), typeof(string), typeof(string) });
         private static MethodInfo BuildPredicateMethod = typeof(Filter).GetMethod("BuildPredicate", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -129,23 +136,6 @@ namespace EFCoreSugar.Filters
             Expression<Func<T, bool>> predicate = null;
             Expression<Func<T, bool>> fuzzyMatchPredicate = null;
             string orderByFinalName = null;
-            string fuzzyMatchTerm = null;
-
-            if (!string.IsNullOrWhiteSpace(FuzzyMatchTerm))
-            {
-                if (filterCache.OperationAttribute == null || filterCache.OperationAttribute.FuzzyMode == FuzzyMatchMode.Contains)
-                {
-                    fuzzyMatchTerm = $"%{FuzzyMatchTerm}%";
-                }
-                else if (filterCache.OperationAttribute.FuzzyMode == FuzzyMatchMode.StartsWith)
-                {
-                    fuzzyMatchTerm = $"{FuzzyMatchTerm}%";
-                }
-                else //endswith
-                {
-                    fuzzyMatchTerm = $"%{FuzzyMatchTerm}";
-                }
-            }
 
             foreach (var filterProp in filterCache.FilterProperties)
             {
@@ -177,9 +167,9 @@ namespace EFCoreSugar.Filters
                         predicate = subPredicate;
                     }
                 }
-                else if(!string.IsNullOrWhiteSpace(fuzzyMatchTerm) && filterProp.Property.PropertyType == typeof(string))
+                else if(filterProp.FuzzyMatchMode != FuzzyMatchMode.None && !string.IsNullOrWhiteSpace(FuzzyMatchTerm) && filterProp.Property.PropertyType == typeof(string))
                 {
-                    var subPredicate = BuildPredicate<T>(entityParam, entityParam, filterProp, fuzzyMatchTerm, true);
+                    var subPredicate = BuildPredicate<T>(entityParam, entityParam, filterProp, FuzzyMatchFormats[filterProp.FuzzyMatchMode](FuzzyMatchTerm), true);
                     fuzzyMatchPredicate = fuzzyMatchPredicate?.Or(subPredicate) ?? subPredicate;
                 }
             }
