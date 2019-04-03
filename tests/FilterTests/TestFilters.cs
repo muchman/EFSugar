@@ -62,6 +62,11 @@ namespace Tests.FilterTestGoup
         public string PartName { get; set; }
     }
 
+    public class UserPrivateFilter : Filter
+    {
+        private string FirstName { get; set; }
+    }
+
     public class CollectionFilter : Filter
     {
         public int? Id { get; set; }

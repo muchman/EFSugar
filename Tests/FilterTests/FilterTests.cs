@@ -352,5 +352,30 @@ namespace Tests.FilterTestGoup
             filtered = users.Filter(filter).Resolve();
             filtered.Value.Count().Should().Be(0);
         }
+
+        [Fact]
+        public void PrivateFilterVariableInFuzzySearch()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            //special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+
+            context.Add(new User() { Id = 1, FirstName = "BobTheMan", LastName = "Turtle" });
+            context.Add(new User() { Id = 2, FirstName = "TheManDon", LastName = "Bear" });
+
+            context.SaveChanges();
+
+            var filter = new UserPrivateFilter { FuzzyMatchTerm = "TheMan" };
+
+            var users = repo.GetQueryable<User>();
+            var filtered = users.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(2);
+
+            filter.FuzzyMatchTerm = "Turtle";
+
+            users = repo.GetQueryable<User>();
+            filtered = users.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(0);
+        }
     }
 }

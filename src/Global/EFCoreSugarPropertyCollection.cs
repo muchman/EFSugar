@@ -31,7 +31,7 @@ namespace EFCoreSugar.Global
 
         internal static IEnumerable<FilterProperty> RegisterFilterProperties(Type type)
         {
-            var props = type.GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(FilterIgnoreAttribute)));
+            var props = type.GetProperties(_BindingFlags | BindingFlags.NonPublic).Where(p => !Attribute.IsDefined(p, typeof(FilterIgnoreAttribute)));
             List<FilterProperty> propsList = new List<FilterProperty>();
 
             var baseFilterOperation = type.GetCustomAttribute<FilterOperationAttribute>();
