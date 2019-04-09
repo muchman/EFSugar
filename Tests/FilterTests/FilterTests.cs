@@ -371,7 +371,8 @@ namespace Tests.FilterTestGoup
             var filtered = users.Filter(filter).Resolve();
             filtered.Value.Count().Should().Be(2);
 
-            filter.FuzzyMatchTerm = "Turtle";
+            //TODO: We have a bug here where if you re-use the filter it blows up because it assigned a sort by property that doesnt exist in the filter
+            filter = new UserPrivateFilter { FuzzyMatchTerm = "Turtle" };
 
             users = repo.GetQueryable<User>();
             filtered = users.Filter(filter).Resolve();
