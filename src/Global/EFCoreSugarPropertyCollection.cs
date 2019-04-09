@@ -39,9 +39,10 @@ namespace EFCoreSugar.Global
 
             foreach (var prop in props)
             {
+                //TODO: Remove the BaseFilterOperation.FuzzyMode from here in v2, it is obsolete
                 propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>(), 
                     prop.GetCustomAttribute<FilterOperationAttribute>()?.Operation ?? baseFilterOperation?.Operation ?? FilterOperation.And,
-                    prop.GetCustomAttribute<FilterFuzzyMatchAttribute>()?.FuzzyMatchMode ?? baseFuzzyMatchMode?.FuzzyMatchMode ?? FuzzyMatchMode.Contains));
+                    prop.GetCustomAttribute<FilterFuzzyMatchAttribute>()?.FuzzyMatchMode ?? baseFuzzyMatchMode?.FuzzyMatchMode ?? baseFilterOperation?.FuzzyMode ?? FuzzyMatchMode.Contains));
             }
       
             var cache = new FilterCache(propsList, baseFilterOperation);
