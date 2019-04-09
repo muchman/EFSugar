@@ -13,9 +13,9 @@
     <Description>Package to assist in boilerplate of repositories and predicate building with filter objects</Description>
     <PackageTags>EntityFrameworkCore Repository Predicate Sugar</PackageTags>
     <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
-    <Version>1.2.4</Version>
-    <AssemblyVersion>1.2.4.0</AssemblyVersion>
-    <FileVersion>1.2.4.0</FileVersion>
+    <Version>1.2.5</Version>
+    <AssemblyVersion>1.2.5.0</AssemblyVersion>
+    <FileVersion>1.2.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
