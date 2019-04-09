@@ -1,4 +1,5 @@
-﻿using EFCoreSugar.Filters;
+﻿using EFCoreSugar.Enumerations;
+using EFCoreSugar.Filters;
 using EFCoreSugar.Repository;
 using EFCoreSugar.Repository.Interfaces;
 using System;
@@ -30,14 +31,18 @@ namespace EFCoreSugar.Global
 
         internal static IEnumerable<FilterProperty> RegisterFilterProperties(Type type)
         {
-            var props = type.GetProperties(_BindingFlags).Where(p => !Attribute.IsDefined(p, typeof(FilterIgnoreAttribute)));
+            var props = type.GetProperties(_BindingFlags | BindingFlags.NonPublic).Where(p => !Attribute.IsDefined(p, typeof(FilterIgnoreAttribute)));
             List<FilterProperty> propsList = new List<FilterProperty>();
 
             var baseFilterOperation = type.GetCustomAttribute<FilterOperationAttribute>();
+            var baseFuzzyMatchMode = type.GetCustomAttribute<FilterFuzzyMatchAttribute>();
 
             foreach (var prop in props)
             {
-                propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>(), prop.GetCustomAttribute<FilterOperationAttribute>()?.Operation ?? baseFilterOperation?.Operation ?? FilterOperation.And));
+                //TODO: Remove the BaseFilterOperation.FuzzyMode from here in v2, it is obsolete
+                propsList.Add(new FilterProperty(prop, prop.GetCustomAttribute<FilterPropertyAttribute>(), 
+                    prop.GetCustomAttribute<FilterOperationAttribute>()?.Operation ?? baseFilterOperation?.Operation ?? FilterOperation.And,
+                    prop.GetCustomAttribute<FilterFuzzyMatchAttribute>()?.FuzzyMatchMode ?? baseFuzzyMatchMode?.FuzzyMatchMode ?? baseFilterOperation?.FuzzyMode ?? FuzzyMatchMode.Contains));
             }
       
             var cache = new FilterCache(propsList, baseFilterOperation);

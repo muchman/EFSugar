@@ -41,6 +41,17 @@ namespace Tests.FilterTestGoup
         public DateTime? DOB { get; set; }
         public int? Age { get; set; }
     }
+    [FilterFuzzyMatch(FuzzyMatchMode.None)]
+    public class UserFilterSpecialFuzzy : Filter
+    {
+        public int? Id { get; set; }
+        [FilterFuzzyMatch(FuzzyMatchMode.EndsWith)]
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        [FilterProperty(FilterTest.GreaterThanEqualTo)]
+        public DateTime? DOB { get; set; }
+        public int? Age { get; set; }
+    }
 
     public class UserOrderNavigationPropFilter : Filter
     {
@@ -49,6 +60,11 @@ namespace Tests.FilterTestGoup
 
         [FilterProperty("Orders.Parts.PartName")]
         public string PartName { get; set; }
+    }
+
+    public class UserPrivateFilter : Filter
+    {
+        private string FirstName { get; set; }
     }
 
     public class CollectionFilter : Filter

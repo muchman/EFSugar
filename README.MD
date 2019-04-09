@@ -285,24 +285,33 @@ Starting in v1.2.1 Filters can have a FilterOperation Attribute.  This specifies
 ```
 
 ### **FuzzyMatchTerm**
-Starting in v1.2.1 Filters all have a FuzzyMatchTerm property.  It's behavior can be set by the FilterOperation Attribute to: 
+Starting in v1.2.1 Filters all have a FuzzyMatchTerm property.  It's behavior can be set by the FilterFuzzyMatch Attribute to: 
 * Contains (default)
 * StartsWith
-* EndsWith.  
+* EndsWith
+* None
+
+**NOTE: Prior to 1.2.5 these values were set with the FilterOperation attribute.  That is obsolete and will be removed in a future version.**
 
 If you specify a value for a FuzzyMatchTerm it will try to apply a match based on the FuzzyMatchMode to all string properties that do not have a value set.  This allows doing things like dynamic partial searches where the user types in something like "Mon" and it finds "Montana", "Monday", "Jack the Monkey"
 
 ```C#
-    [FilterOperation(FuzzyMatchMode.Contains)]
+    [FilterFuzzyMatch(FuzzyMatchMode.Contains)]
     public class ItemFilter : Filter
     {
         public int? Id { get; set; }
+		//You can override the top level fuzzy match type and hide the property from fuzzymatching
+		[FilterFuzzyMatch(FuzzyMatchMode.None)]
         public string ItemName { get; set; }
     }
 ```
 
 
 ## Release History
+* 1.2.5
+	* Added the FuzzyMatchAttribute and added obsolete warning to FilterOperation for setting the FuzzyMatchMode.  You can now set FuzzyMatchMode on a property via the FuzzyMatchAttribute.  This will override any FuzzyMatchMode on the filter object that contains that property.
+	* Added FuzzyMatchMode.None to exclude a property from fuzzy match searching.
+	* Filters now look for both Public and NonPublic properties.  This is so you can hide properties in query strings but still use them for things like fuzzy search or orderby. 
 * 1.2.4
     * Add the ability to resolve collection navigation properties in the entity. It will do a look up on the collection with .Any(\<predicate>) for the final condition.  It is nested so you can end up with expressions that look like query.Where(x => x.Users.Any(u => u.Items.Any(i => i.Name == "Hat")))
     * Add the ability to resolve a collection on the filter side.  This will resolve with a .Contains().  This way you can have something like a List\<someEnum>() against an entity with an Enum property.  This ends up looking like query.Where(x => ( Enum1, Enum2, Enum3 ).Contains( x.Status ))
