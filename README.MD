@@ -308,6 +308,14 @@ If you specify a value for a FuzzyMatchTerm it will try to apply a match based o
 
 
 ## Release History
+* 1.2.6
+	* Fixed RegisterBaseRepositories to correctly load the repository even if the code before it has not referenced the repo and loaded the dll into the working memory.
+	* Added an optional ServiceLifetime to RegisterBaseRepositories, by default it is Transient
+	* Added a RecycleDbContext function to BaseDbRepositories that will dispose of the current context and try to acquire a new one.  This is useful in large ETL processes where you want better memory management control while still relying on the magic of DI.
+	    * **NOTE:** This will only work if the context is registered in your DI container as Lifetime.Transient!
+	* Added the Set<T> and Query<T> functions to the BaseDbRepository to keep it consistent with how those are accessed in the RepositoryGroups
+	* Added a ResolveAsync function to FilteredQueries
+	* Added Resolve and ResolveAsync functions to IQueryable<T> so instead of query.Filter(filter).Resolve() you can just write query.Resolve(filter)
 * 1.2.5
 	* Added the FuzzyMatchAttribute and added obsolete warning to FilterOperation for setting the FuzzyMatchMode.  You can now set FuzzyMatchMode on a property via the FuzzyMatchAttribute.  This will override any FuzzyMatchMode on the filter object that contains that property.
 	* Added FuzzyMatchMode.None to exclude a property from fuzzy match searching.

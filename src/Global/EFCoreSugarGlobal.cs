@@ -2,7 +2,9 @@
 using EFCoreSugar.Global;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace EFCoreSugar
@@ -21,16 +23,24 @@ namespace EFCoreSugar
 
         internal static IEnumerable<Type> GetAllTypesInAssemblies(Type type)
         {
-            var domain = AppDomain.CurrentDomain;
+            //var domain = AppDomain.CurrentDomain;
 
-            var assemblies = domain.GetAssemblies();
+            //var assemblies = domain.GetAssemblies();
+
+            var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll").ToList();
 
             List<Type> types = new List<Type>();
 
-            foreach (var assembly in assemblies)
+            referencedPaths.ForEach(path =>
             {
-                types.AddRange(assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && type.IsAssignableFrom(t)));
-            }
+                var loadedAssembly = Assembly.LoadFrom(path);
+                types.AddRange(loadedAssembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && type.IsAssignableFrom(t)));
+            });
+
+            //foreach (var assembly in assemblies)
+            //{
+            //    types.AddRange(assembly.GetTypes().Where(t => t.IsClass && !t.IsAbstract && type.IsAssignableFrom(t)));
+            //}
 
             return types;
         }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EFCoreSugar.Filters
 {
@@ -29,6 +30,16 @@ namespace EFCoreSugar.Filters
         public static FilteredQuery<T> Filter<T>(this IQueryable<T> query, Filter filter) where T : class
         {
             return filter.ApplyFilter(query);
+        }
+
+        public static FilteredResult<T> Resolve<T>(this IQueryable<T> query, Filter filter) where T : class
+        {
+            return filter.ApplyFilter(query).Resolve();
+        }
+
+        public static async Task<FilteredResult<T>> ResolveAsync<T>(this IQueryable<T> query, Filter filter) where T : class
+        {
+            return await filter.ApplyFilter(query).ResolveAsync();
         }
 
         public static FilteredQuery<T> Filter<T>(this DbContext context, Filter filter) where T : class

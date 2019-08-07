@@ -7,17 +7,20 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EFCoreSugar.Repository
 {
     public abstract class BaseDbRepository<T> : IBaseDbRepository where T : DbContext
     {
-        public DbContext DBContext { get; }
+        public DbContext DBContext { get; private set; }
         private bool _deferred;
+        private readonly IServiceProvider _serviceProvider;
 
         public BaseDbRepository(T context, IServiceProvider serviceProvider)
         {
             DBContext = context;
+            _serviceProvider = serviceProvider;
             var thisType = this.GetType();
 
             if (!EFCoreSugarPropertyCollection.BaseDbRepositoryGroupTypeProperties.TryGetValue(thisType, out var props))
@@ -28,6 +31,10 @@ namespace EFCoreSugar.Repository
             foreach (var prop in props)
             {
                 var group = serviceProvider.GetService(prop.PropertyType) as IBaseRepositoryGroup;
+                if(group is null)
+                {
+                    continue;
+                }
                 group.ParentBaseRepository = this;
                 prop.SetValue(this, group);
             }
@@ -151,6 +158,26 @@ namespace EFCoreSugar.Repository
         public TEntity GetSingle<TEntity>(object key, bool trackChanges = true) where TEntity : class
         {
             return DBContext.Set<TEntity>().Find(key);
+        }
+
+        public DbSet<TEntity> Set<TEntity>() where TEntity : class
+        {
+            return DBContext.Set<TEntity>();
+        }
+
+        public DbQuery<TEntity> Query<TEntity>() where TEntity : class
+        {
+            return DBContext.Query<TEntity>();
+        }
+
+        /// <summary>
+        ///This will dispose of the current DbContext and request a new one from the DI framework.
+        ///The dbcontext must registered with DI as transient or else the new context will also be disposed.
+        /// </summary>
+        public void RecycleDbContext()
+        {
+            DBContext.Dispose();
+            DBContext = _serviceProvider.GetService<T>();
         }
     }
 }

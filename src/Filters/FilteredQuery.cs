@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace EFCoreSugar.Filters
 {
@@ -20,7 +22,7 @@ namespace EFCoreSugar.Filters
             OrderBys.Add(orderByFilter);
         }
 
-        public FilteredResult<T> Resolve()
+        private (IQueryable<T> Query, int RecordCount) BuildPagedQuery()
         {
             var result = Query.Expression;
             var nested = false;
@@ -30,15 +32,26 @@ namespace EFCoreSugar.Filters
                 var operation = orderByFilter.ConstructOrderByExpression<T>(nested);
                 result = Expression.Call(typeof(Queryable),
                     operation.Command,
-                    new[] { Query.ElementType, operation.MemberType},
+                    new[] { Query.ElementType, operation.MemberType },
                     result,
                     Expression.Quote(operation.OrderByExpression));
                 nested = true;
             }
 
             Query = Query.Provider.CreateQuery<T>(result);
-            var pagingResult = PagingFilter.ApplyFilter(Query);
+            return PagingFilter.ApplyFilter(Query);
+        }
+
+        public FilteredResult<T> Resolve()
+        {
+            var pagingResult = BuildPagedQuery();
             return new FilteredResult<T>() { RecordCount = pagingResult.RecordCount, Value = pagingResult.Query.ToList() };
+        }
+
+        public async Task<FilteredResult<T>> ResolveAsync()
+        {
+            var pagingResult = BuildPagedQuery();
+            return new FilteredResult<T>() { RecordCount = pagingResult.RecordCount, Value = await pagingResult.Query.ToListAsync() };
         }
 
     }
