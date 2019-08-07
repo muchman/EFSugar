@@ -64,12 +64,17 @@ namespace EFCoreSugar.Repository
 
         protected DbSet<T> Set<T>() where T : class
         {
-            return ParentBaseRepository.DBContext.Set<T>();
+            return ParentBaseRepository.Set<T>();
         }
 
         protected DbQuery<T> Query<T>() where T : class
         {
-            return ParentBaseRepository.DBContext.Query<T>();
+            return ParentBaseRepository.Query<T>();
+        }
+
+        protected void RecycleDbContext()
+        {
+            ParentBaseRepository.RecycleDbContext();
         }
     }
 }

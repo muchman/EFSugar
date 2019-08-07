@@ -14,15 +14,15 @@ namespace EFCoreSugar
     {
         public static IServiceCollection RegisterRepositoryGroups(this IServiceCollection collection)
         {
-            return RegisterType(collection, typeof(IBaseRepositoryGroup));
+            return RegisterType(collection, typeof(IBaseRepositoryGroup), ServiceLifetime.Transient);
         }
 
-        public static IServiceCollection RegisterBaseRepositories(this IServiceCollection collection)
+        public static IServiceCollection RegisterBaseRepositories(this IServiceCollection collection, ServiceLifetime lifetime = ServiceLifetime.Transient)
         {
-            return RegisterType(collection, typeof(IBaseDbRepository));
+            return RegisterType(collection, typeof(IBaseDbRepository), lifetime);
         }
 
-        private static IServiceCollection RegisterType(IServiceCollection collection, Type baseType)
+        private static IServiceCollection RegisterType(IServiceCollection collection, Type baseType, ServiceLifetime lifetime)
         {
             var types = EFCoreSugarGlobal.GetAllTypesInAssemblies(baseType);
 
@@ -32,7 +32,7 @@ namespace EFCoreSugar
                 var interfaceType = type.GetInterface($"I{type.Name}", true);
                 if (interfaceType != null)
                 {
-                    collection.AddTransient(interfaceType, type);
+                    collection.Add(new ServiceDescriptor(interfaceType, type, lifetime));
                 }
             }
             return collection;
