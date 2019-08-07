@@ -43,5 +43,13 @@ namespace Tests.RepoTests
             repo.GetQueryable<User>().Should().NotBeNull();
             repo.GetQueryable<SomeView>().Should().NotBeNull();
         }
+
+        [Fact]
+        public void RecycleDbContextTest()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            repo.GetQueryable<User>().Should().NotBeNull();
+            repo.GetQueryable<SomeView>().Should().NotBeNull();
+        }
     }
 }
