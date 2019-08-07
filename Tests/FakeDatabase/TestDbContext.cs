@@ -11,14 +11,16 @@ namespace Tests.FakeDatabase
 {
     public class TestDbContext : DbContext
     {
+
+
+
         public DbSet<Order> Orders { get; set; }
         public DbSet<User> Users{ get; set; }
         public DbSet<OrderType> OrderTypes { get; set; }
         //this is only for the queryable test
         public DbQuery<SomeView> UserView { get; set; }
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
         {
-            optionsBuilder.UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString());
         }
     }
 }

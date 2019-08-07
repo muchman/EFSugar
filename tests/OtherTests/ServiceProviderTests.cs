@@ -1,5 +1,6 @@
 ﻿using EFCoreSugar;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,8 @@ namespace Tests.OtherTests
         {
             var services = new ServiceCollection();
             services.RegisterBaseRepositories();
+            services.AddDbContext<TestDbContext>(opts =>
+                opts.UseInMemoryDatabase("Context"));
             var serviceProvider = services.BuildServiceProvider();
             serviceProvider.GetService<FakeRepo>().Should().NotBeNull();
         }

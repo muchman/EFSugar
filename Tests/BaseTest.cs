@@ -1,4 +1,5 @@
 ﻿using EFCoreSugar;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,12 @@ namespace Tests
     public class BaseTest
     {
         public IServiceProvider ServiceProvider { get; set; }
+        private static int _initCounter = 0;
         public BaseTest()
         {
             var services = new ServiceCollection();
             RegisterServices(services);
+            ConfigureDbContext(services);
             ServiceProvider = services.BuildServiceProvider();
 
         }
@@ -27,6 +30,14 @@ namespace Tests
             services.RegisterRepositoryGroups();
             services.AddScoped<TestDbContext>();
             return services;
+        }
+
+        protected virtual void ConfigureDbContext(IServiceCollection services)
+        {
+            var name = GetType().Name;
+
+            services.AddDbContext<TestDbContext>(opts =>
+                opts.UseInMemoryDatabase(name + "-" + _initCounter++));
         }
 
         protected virtual void SeedData()

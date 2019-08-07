@@ -31,6 +31,10 @@ namespace EFCoreSugar.Repository
             foreach (var prop in props)
             {
                 var group = serviceProvider.GetService(prop.PropertyType) as IBaseRepositoryGroup;
+                if(group is null)
+                {
+                    continue;
+                }
                 group.ParentBaseRepository = this;
                 prop.SetValue(this, group);
             }

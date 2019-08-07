@@ -1,6 +1,7 @@
 ﻿using EFCoreSugar;
 using EFCoreSugar.Filters;
 using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -20,7 +21,8 @@ namespace Tests.RepoTests
         {
             var services = new ServiceCollection() as IServiceCollection;
             //we just need this so we can resolve the repo;
-            services.AddScoped<TestDbContext>();
+            services.AddDbContext<TestDbContext>(opts =>
+                opts.UseInMemoryDatabase("Context"));
             services.RegisterBaseRepositories();
             services.RegisterRepositoryGroups();
             var servicesProvider = services.BuildServiceProvider();
@@ -47,9 +49,18 @@ namespace Tests.RepoTests
         [Fact]
         public void RecycleDbContextTest()
         {
-            var repo = ServiceProvider.GetService<FakeRepo>();
+            var services = new ServiceCollection() as IServiceCollection;
+            //we just need this so we can resolve the repo;
+            services.AddDbContext<TestDbContext>(opts =>
+                opts.UseInMemoryDatabase("Context"), ServiceLifetime.Transient);
+            services.RegisterBaseRepositories();
+            services.RegisterRepositoryGroups();
+            var servicesProvider = services.BuildServiceProvider();
+
+            var repo = servicesProvider.GetService<FakeRepo>();
             repo.GetQueryable<User>().Should().NotBeNull();
-            repo.GetQueryable<SomeView>().Should().NotBeNull();
+            repo.RecycleDbContext();
+            repo.GetQueryable<User>().Should().NotBeNull();
         }
     }
 }
