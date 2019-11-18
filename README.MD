@@ -308,6 +308,9 @@ If you specify a value for a FuzzyMatchTerm it will try to apply a match based o
 
 
 ## Release History
+* 1.2.7
+	* Upgraded to EF Core 3.0
+	* Removed the Query<T>() function from BaseRepository as this is obsolete with Ef Core 3.0
 * 1.2.6
 	* Fixed RegisterBaseRepositories to correctly load the repository even if the code before it has not referenced the repo and loaded the dll into the working memory.
 	* Added an optional ServiceLifetime to RegisterBaseRepositories, by default it is Transient
