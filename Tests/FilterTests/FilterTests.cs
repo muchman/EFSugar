@@ -23,7 +23,7 @@ namespace Tests.FilterTestGoup
             var repo = ServiceProvider.GetService<FakeRepo>();
             SeedData();
 
-            var filter = new OrderFilter() { NestedOrderTypeId = 1, UId = 1 };
+            var filter = new OrderFilter() { OrderTypeId = 1, UId = 1 };
 
             //should be 3
             var orders = repo.Filter<Order>(filter);

@@ -17,8 +17,6 @@ namespace Tests.FakeDatabase
         public DbSet<Order> Orders { get; set; }
         public DbSet<User> Users{ get; set; }
         public DbSet<OrderType> OrderTypes { get; set; }
-        //this is only for the queryable test
-        public DbQuery<SomeView> UserView { get; set; }
         public TestDbContext(DbContextOptions<TestDbContext> options) : base(options)
         {
         }

@@ -27,11 +27,11 @@ namespace EFCoreSugar.Repository
             {
                 props = EFCoreSugarPropertyCollection.RegisterBaseDbRepositoryGroupProperties(thisType);
             }
-            
+
             foreach (var prop in props)
             {
                 var group = serviceProvider.GetService(prop.PropertyType) as IBaseRepositoryGroup;
-                if(group is null)
+                if (group is null)
                 {
                     continue;
                 }
@@ -70,7 +70,7 @@ namespace EFCoreSugar.Repository
             return 0;
         }
 
-        public async Task<int> DeleteAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken) ) where TEntity : class
+        public async Task<int> DeleteAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = default(CancellationToken)) where TEntity : class
         {
             DBContext.Set<TEntity>().Remove(entity);
             if (!_deferred)
@@ -95,7 +95,7 @@ namespace EFCoreSugar.Repository
             DBContext.Entry(entity).State = EntityState.Modified;
             if (!_deferred)
             {
-               return await DBContext.SaveChangesAsync(cancellationToken);
+                return await DBContext.SaveChangesAsync(cancellationToken);
             }
             return 0;
         }
@@ -129,24 +129,9 @@ namespace EFCoreSugar.Repository
                     return dbset.AsNoTracking();
                 }
             }
-            catch(InvalidCastException ex)
-            { 
-                var dbquery = DBContext.Query<TEntity>();
-                if(dbquery != null)
-                {
-                    if (trackChanges)
-                    {
-                        return dbquery.AsQueryable();
-                    }
-                    else
-                    {
-                        return dbquery.AsNoTracking();
-                    }
-                }
-                else
-                {
-                    throw new Exception($"No Set or DbQuery of type {typeof(TEntity)} found.");
-                }
+            catch (InvalidCastException)
+            {
+                throw new Exception($"No Set or DbQuery of type {typeof(TEntity)} found.");
             }
         }
 
@@ -163,11 +148,6 @@ namespace EFCoreSugar.Repository
         public DbSet<TEntity> Set<TEntity>() where TEntity : class
         {
             return DBContext.Set<TEntity>();
-        }
-
-        public DbQuery<TEntity> Query<TEntity>() where TEntity : class
-        {
-            return DBContext.Query<TEntity>();
         }
 
         /// <summary>

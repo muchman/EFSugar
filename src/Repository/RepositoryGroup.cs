@@ -11,6 +11,7 @@ namespace EFCoreSugar.Repository
     public abstract class RepositoryGroup<TEntity> : IRepositoryGroup<TEntity> where TEntity : class
     {
         public IBaseDbRepository ParentBaseRepository { get; set; }
+        public DbContext DBContext => ParentBaseRepository.DBContext;
 
         public virtual TEntity GetSingle(object key)
         {
@@ -65,11 +66,6 @@ namespace EFCoreSugar.Repository
         protected DbSet<T> Set<T>() where T : class
         {
             return ParentBaseRepository.Set<T>();
-        }
-
-        protected DbQuery<T> Query<T>() where T : class
-        {
-            return ParentBaseRepository.Query<T>();
         }
 
         protected void RecycleDbContext()

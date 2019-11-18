@@ -24,7 +24,6 @@ namespace EFCoreSugar.Repository
         IEnumerable<TEntity> GetAll<TEntity>(bool trackChanges = true) where TEntity : class;
         TEntity GetSingle<TEntity>(object key, bool trackChanges = true) where TEntity : class;
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
-        DbQuery<TEntity> Query<TEntity>() where TEntity : class;
         void RecycleDbContext();
     }
 }
