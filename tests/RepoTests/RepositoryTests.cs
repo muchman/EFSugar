@@ -43,7 +43,6 @@ namespace Tests.RepoTests
         {
             var repo = ServiceProvider.GetService<FakeRepo>();
             repo.GetQueryable<User>().Should().NotBeNull();
-            repo.GetQueryable<SomeView>().Should().NotBeNull();
         }
 
         [Fact]
