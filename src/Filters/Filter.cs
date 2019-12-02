@@ -25,7 +25,8 @@ namespace EFCoreSugar.Filters
                         { FilterTest.GreaterThanEqualTo, Expression.GreaterThanOrEqual },
                         { FilterTest.LessThan, Expression.LessThan },
                         { FilterTest.LessThanEqualTo, Expression.LessThanOrEqual},
-                        { FilterTest.NotEqual, Expression.NotEqual }
+                        { FilterTest.NotEqual, Expression.NotEqual },
+                        { FilterTest.BitwiseAnd, Expression.And },
             };
 
         private static Dictionary<FuzzyMatchMode, Func<string, string>> FuzzyMatchFormats = new Dictionary<FuzzyMatchMode, Func<string, string>>
@@ -110,8 +111,16 @@ namespace EFCoreSugar.Filters
                 {
                     //we have to do a conversion or else it will blow up when the entity type is nullable
                     right = Expression.Convert(Expression.Constant(propValue), currentLeft.Type);
-                    subPredicate = Expression.Lambda<Func<T, bool>>(
-                    FilterTestMap[filterProp.Test](currentLeft, right), new[] { predParam });
+                    var mapped = FilterTestMap[filterProp.Test](currentLeft, right);
+                    if (mapped.Type != typeof(bool))
+                    {
+                        // Handle conditions that do no return a boolean initially
+                        subPredicate = Expression.Lambda<Func<T, bool>>(Expression.GreaterThan(mapped, Expression.Constant(0)), new[] { predParam });
+                    }
+                    else
+                    {
+                        subPredicate = Expression.Lambda<Func<T, bool>>(mapped, new[] { predParam });
+                    }
                 }
 
                 

@@ -15,6 +15,7 @@ namespace Tests.FakeEntities
         public string ProductName { get; set; }
         public int Value { get; set; }
         public int OrderTypeId { get; set; }
+        public int EquipmentTypes { get; set; }
 
         [ForeignKey("UserId")]
         public User User { get; set; }
