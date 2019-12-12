@@ -11,6 +11,7 @@ namespace EFCoreSugar.Filters
         GreaterThan,
         GreaterThanEqualTo,
         LessThan,
-        LessThanEqualTo
+        LessThanEqualTo,
+        BitwiseAnd
     }
 }

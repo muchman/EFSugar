@@ -397,5 +397,30 @@ namespace Tests.FilterTestGoup
             var filtered = users.ResolveAsync(filter).Result;
             filtered.Value.Count().Should().Be(2);
         }
+
+        [Fact]
+        public void BitwiseAnd()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            // special data setup
+            var context = ServiceProvider.GetService<TestDbContext>();
+
+            context.Add(new Order() { Id = 1, UserId = 1, EquipmentTypes = 12 });
+            context.Add(new Order() { Id = 2, UserId = 2, EquipmentTypes = 8 });
+            context.Add(new Order() { Id = 3, UserId = 3, EquipmentTypes = 15 });
+            context.Add(new Order() { Id = 4, UserId = 4, EquipmentTypes = 0 });
+
+            context.SaveChanges();
+
+            var filter = new OrderFilter { EquipmentTypes = 8 };
+            var orders = repo.GetQueryable<Order>();
+            var filtered = orders.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(3);
+
+            filter = new OrderFilter { EquipmentTypes = 3 };
+            orders = repo.GetQueryable<Order>();
+            filtered = orders.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(1);
+        }
     }
 }

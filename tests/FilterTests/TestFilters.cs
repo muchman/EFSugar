@@ -20,6 +20,8 @@ namespace Tests.FilterTestGoup
         public int? NestedOrderTypeId { get; set; }
         [FilterProperty(FilterTest.GreaterThanEqualTo)]
         public DateTimeOffset? OrderDateTime { get; set; }
+        [FilterProperty(FilterTest.BitwiseAnd)]
+        public int? EquipmentTypes { get; set; }
     }
 
     public class UserFilter : Filter
