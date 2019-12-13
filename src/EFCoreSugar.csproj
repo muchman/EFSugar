@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <PackageId>EFCoreSugar</PackageId>
     <Authors>Mike Uchman</Authors>
     <Company />
@@ -13,13 +13,17 @@
     <Description>Package to assist in boilerplate of repositories and predicate building with filter objects</Description>
     <PackageTags>EntityFrameworkCore Repository Predicate Sugar</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <Version>1.2.8</Version>
-    <AssemblyVersion>1.2.8.0</AssemblyVersion>
-    <FileVersion>1.2.8.0</FileVersion>
+    <Version>1.2.8.1</Version>
+    <AssemblyVersion>1.2.8</AssemblyVersion>
+    <FileVersion>1.2.8</FileVersion>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0" />
   </ItemGroup>
 
 </Project>
