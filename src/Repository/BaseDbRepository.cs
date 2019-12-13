@@ -150,6 +150,13 @@ namespace EFCoreSugar.Repository
             return DBContext.Set<TEntity>();
         }
 
+#if FEATURE_2_0
+        public DbQuery<TEntity> Query<TEntity>() where TEntity : class
+        {
+            return DBContext.Query<TEntity>();
+        }
+#endif
+
         /// <summary>
         ///This will dispose of the current DbContext and request a new one from the DI framework.
         ///The dbcontext must registered with DI as transient or else the new context will also be disposed.

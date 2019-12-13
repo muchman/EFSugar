@@ -13,9 +13,13 @@
     <Description>Package to assist in boilerplate of repositories and predicate building with filter objects</Description>
     <PackageTags>EntityFrameworkCore Repository Predicate Sugar</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <Version>1.2.8.1</Version>
+    <Version>1.2.8.2</Version>
     <AssemblyVersion>1.2.8</AssemblyVersion>
     <FileVersion>1.2.8</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+    <DefineConstants>FEATURE_2_0</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.1'">
