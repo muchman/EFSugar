@@ -308,6 +308,8 @@ If you specify a value for a FuzzyMatchTerm it will try to apply a match based o
 
 
 ## Release History
+* 1.2.8
+    * Added bitwise AND operation to the FilterTest enum, it is set on a property in the filter through the FilterProperty attribute like this [FilterProperty(FilterTest.BitwiseAnd)].  This is useful when you have an enum flag and want to essentially do a .HasFlag() operation.
 * 1.2.7
 	* Upgraded to EF Core 3.0
 	* Removed the Query<T>() function from BaseRepository as this is obsolete with Ef Core 3.0
