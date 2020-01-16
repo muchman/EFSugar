@@ -422,5 +422,18 @@ namespace Tests.FilterTestGoup
             filtered = orders.Filter(filter).Resolve();
             filtered.Value.Count().Should().Be(1);
         }
+
+        [Fact]
+        public void FuzzyMatchIncludesExplicitStringFilter()
+        {
+            var repo = ServiceProvider.GetService<FakeRepo>();
+            SeedData();
+
+            // Should return FirstName matching Bob
+            var filter = new UserFilter { FirstName = "Bob", FuzzyMatchTerm = "Bo" };
+            var users = repo.GetQueryable<User>();
+            var filtered = users.Filter(filter).Resolve();
+            filtered.Value.Count().Should().Be(2);
+        }
     }
 }

@@ -176,7 +176,8 @@ namespace EFCoreSugar.Filters
                         predicate = subPredicate;
                     }
                 }
-                else if(filterProp.FuzzyMatchMode != FuzzyMatchMode.None && !string.IsNullOrWhiteSpace(FuzzyMatchTerm) && filterProp.Property.PropertyType == typeof(string))
+
+                if(filterProp.FuzzyMatchMode != FuzzyMatchMode.None && !string.IsNullOrWhiteSpace(FuzzyMatchTerm) && filterProp.Property.PropertyType == typeof(string))
                 {
                     var subPredicate = BuildPredicate<T>(entityParam, entityParam, filterProp, FuzzyMatchFormats[filterProp.FuzzyMatchMode](FuzzyMatchTerm), true);
                     fuzzyMatchPredicate = fuzzyMatchPredicate?.Or(subPredicate) ?? subPredicate;
