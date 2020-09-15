@@ -68,14 +68,6 @@ namespace EFCoreSugar.Repository
             return ParentBaseRepository.Set<T>();
         }
 
-#if FEATURE_2_0
-        //this was removed in ef core 3
-        protected DbQuery<T> Query<T>() where T : class
-        {
-            return ParentBaseRepository.Query<T>();
-        }
-#endif
-
         protected void RecycleDbContext()
         {
             ParentBaseRepository.RecycleDbContext();
